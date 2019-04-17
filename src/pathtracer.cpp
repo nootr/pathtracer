@@ -169,23 +169,29 @@ void test() {
 
 int main() {
   test();
-  int w = 200; // width
-  int h = 100; // height
-  int S = 4;   // samples per pixel
+  int h = 200;     // height
+  float a = 4.0/3; // Aspect ratio
+  int S = 4;       // samples per pixel
+  int w = int(h*a);
+
+  Vec origin(-1,2,3);
+  Vec goal(0,0.5,-1);
+
+  Vec r = !(origin + goal * -1);
+  Vec p = !(Vec(0,1,0)^r);
+  Vec q = r^p;
+
+  Vec lower_left_corner = p*(-a) + q*-1 + r*-1;
+  Vec hor = p * 2 * a;
+  Vec ver = q * 2;
 
   printf("P6 %d %d 255 ", w, h);
-
-  Vec lower_left_corner(-2,-1,-1);
-  Vec    hor(4,0,0);
-  Vec    ver(0,2,0);
-  Vec origin(0,1,1);
-
   for (int y = h-1; y >= 0; y--) {
     for (int x = 0; x < w; x++) {
       Vec color(0,0,0);
       for (int s = 0; s < S; s++) {
-        float u = (float(x)+randomVal())/float(w);
-        float v = (float(y)+randomVal())/float(h);
+        float u = (x+randomVal())/w;
+        float v = (y+randomVal())/h;
         Ray r(origin, lower_left_corner + hor*u + ver*v);
         color = color + trace(r,1);
       }
