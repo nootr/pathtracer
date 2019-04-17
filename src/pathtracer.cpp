@@ -14,37 +14,6 @@
  * * A sphere (desk cutout)
  * * A box (the rest)
  *
- * ```
- * >>> def testBox(a, c1, c2):
- * ...   c1x = a[0] - c1[0]
- * ...   c1y = a[1] - c1[1]
- * ...   c2x = c2[0] - a[0]
- * ...   c2y = c2[1] - a[1]
- * ...   return min(c1x, c1y, c2x, c2y)
- * ...
- * >>> testBox((2,3), (1,1), (3,2))
- * -1
- * >>> testBox((2,1.5), (1,1), (3,2))
- * 0.5
- * >>> testBox((0,0), (1,1), (3,2))
- * -1
- * >>> def testCutout(a, c1, c2, c3, c4):
- * ...   return min(testBox(a, c1, c2), -testBox(a, c3, c4))
- * ...
- * >>> testCutout((0,0), (0,1), (4,4), (2,0), (5,2.5))
- * -1
- * >>> testCutout((2,5), (0,1), (4,4), (2,0), (5,2.5))
- * -1
- * >>> testCutout((2,3), (0,1), (4,4), (2,0), (5,2.5))
- * 0.5
- * >>> testCutout((3,2), (0,1), (4,4), (2,0), (5,2.5))
- * -0.5
- * >>> testCutout((3,0.5), (0,1), (4,4), (2,0), (5,2.5))
- * -0.5
- * ```
- *
- *  TL;DR
- *  You can carf piece Y out of a shape X by using `min(testX, -testY)`.
  */
 
 #include <stdlib.h>
@@ -67,15 +36,14 @@ struct Vec {
     Vec operator*(Vec r) { return Vec(x * r.x, y * r.y, z * r.z); }
     float operator%(Vec r) { return x * r.x + y * r.y + z * r.z; }
     Vec operator!() {return *this * (1 / sqrtf(*this % *this) );}
+    Vec operator^(Vec r) {return Vec(y*r.z-z*r.y,z*r.x-x*r.z,x*r.y-y*r.x);}
 };
 
 struct Ray {
-  Vec A, B;
+  Vec d, o; // Direction, origin
 
-  Ray(Vec& o, Vec d) { A = o; B = d; }
-  Vec direction() { return B; }    // Deze twee regels
-  Vec origin() { return A; }       // zijn hopelijk overbodig.
-  Vec point(float t) { return A + B*t; }
+  Ray(Vec a, Vec b) { o = a; d = !b; }
+  Vec p(float t) { return o + d*t; }
 };
 
 /* Utils */
@@ -85,7 +53,7 @@ float randomVal() { return (float) rand() / RAND_MAX; }
 // Rectangle CSG equation. Returns minimum signed distance from
 // space carved by lowerLeft vertex and opposite rectangle
 // vertex upperRight.
-float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
+float BoxTest(Vec position, Vec lowerLeft, Vec upperRight, Vec& normal) {
   lowerLeft = position + lowerLeft * -1;
   upperRight = upperRight + position * -1;
   return -min(
@@ -97,34 +65,51 @@ float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
 }
 
 // Signed distance point(p) to sphere(c,r)
-float SphereTest(Vec p, Vec c, float r) {
-  Vec delta = c + p * -1;
+float SphereTest(Vec p, Vec c, float r, Vec& normal) {
+  Vec delta = p + c * -1;
+  normal = !delta;
   float distance = sqrtf(delta%delta);
   return distance - r;
 }
 
-#define HIT_NONE  0
-#define HIT_SKY   1
-#define HIT_EARTH 2
+#define HIT_NONE   0
+#define HIT_SKY    1
+#define HIT_EARTH  2
+#define HIT_SPHERE 3
+#define HIT_BOX    4
 
-float march(Ray r, int& object, Vec& reflection) {
+Ray march(Ray r, int& object) {
   float d = 0;
+  Vec reflection, n = 1;
 
   while(d < 1e9) {
     // Determine closest object
-    Vec n = r.point(d);
+    Vec m = r.p(d);
     float closest = 1e9;
 
-    float sky = -SphereTest(n,Vec(0,0,0),1000);
+    float sky = -SphereTest(m,Vec(0,0,0),1e3,n);
     if (sky < closest) {
       object = HIT_SKY;
       closest = sky;
     }
 
-    float earth = SphereTest(n,Vec(0,-999,-1),999);
+    float earth = SphereTest(m,Vec(0,-999,-1),999,n);
     if (earth < closest) {
       object = HIT_EARTH;
       closest = earth;
+    }
+
+    float sphere = SphereTest(m,Vec(1,0.5,-1),0.5,n);
+    if (sphere < closest) {
+      object = HIT_SPHERE;
+      closest = sphere;
+      reflection = r.d + (r.d^n)*n*-2;
+    }
+
+    float box = BoxTest(m,Vec(-1.5,0,-1.5),Vec(-0.5,1,-0.5),n);
+    if (box < closest) {
+      object = HIT_BOX;
+      closest = box;
     }
 
     // Check if close enough
@@ -134,25 +119,56 @@ float march(Ray r, int& object, Vec& reflection) {
     d += closest;
   }
 
-  return d - 0.1;
+  return Ray(r.p(d)+n*0.9, reflection);
 }
 
 Vec trace(Ray r, int bounce) {
   int object = HIT_NONE;
-  Vec reflection = Vec(0,0,0);
-  float distance = march(r, object, reflection);
+  Ray reflection = march(r, object);
 
   if (object == HIT_SKY) {
-    float t = 0.5*(r.direction().y + 1.0);
+    float t = 0.5*(r.d.y + 1.0);
     return Vec(1,1,1)*(1-t) + Vec(0.5,0.7,1)*t;
   }
   if (object == HIT_EARTH) {
     return Vec(0,0.7,0);
   }
+  if (object == HIT_SPHERE) {
+    //if(bounce > 0) return trace(reflection,bounce-1);
+    return Vec(0,0,1);
+  }
+  if (object == HIT_BOX) {
+    return Vec(0.7,0.1,0.2);
+  }
+
   return Vec(0,0,0);
 }
 
+void test() {
+  fprintf(stderr, "Function/class tests:\n");
+
+  Vec a(0,1,0);
+  Vec b(1,0,0);
+  Vec c = a^b;
+  Vec d = b^a;
+
+  fprintf(stderr, "Cross-product 1.. ");
+  if ((c.x != 0) || (c.y != 0) || (c.z != -1)) {
+    fprintf(stderr, "Not OK!\n");
+  } else {
+    fprintf(stderr, "OK\n");
+  }
+
+  fprintf(stderr, "Cross-product 2.. ");
+  if ((d.x != 0) || (d.y != 0) || (d.z != 1)) {
+    fprintf(stderr, "Not OK!\n");
+  } else {
+    fprintf(stderr, "OK\n");
+  }
+}
+
 int main() {
+  test();
   int w = 200;
   int h = 100;
 
@@ -161,14 +177,14 @@ int main() {
   Vec lower_left_corner(-2,-1,-1);
   Vec    hor(4,0,0);
   Vec    ver(0,2,0);
-  Vec origin(0,1,0);
+  Vec origin(0,1,1);
 
   for (int y = h-1; y >= 0; y--) {
     for (int x = 0; x < w; x++) {
       float u = float(x)/float(w);
       float v = float(y)/float(h);
       Ray r(origin, lower_left_corner + hor*u + ver*v);
-      Vec col = trace(r,3);
+      Vec col = trace(r,1);
 
       printf("%c%c%c",
           int(col.x*255.9),
