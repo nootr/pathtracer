@@ -56,7 +56,7 @@
 #define O operator
 typedef float F;typedef int I;
 
-/* Vector class */
+/* Classes */
 struct Vec {
     float x, y, z;
 
@@ -65,10 +65,17 @@ struct Vec {
 
     Vec operator+(Vec r) { return Vec(x + r.x, y + r.y, z + r.z); }
     Vec operator*(Vec r) { return Vec(x * r.x, y * r.y, z * r.z); }
-    // dot product
     float operator%(Vec r) { return x * r.x + y * r.y + z * r.z; }
-    // inverse square root
     Vec operator!() {return *this * (1 / sqrtf(*this % *this) );}
+};
+
+struct Ray {
+  Vec A, B;
+
+  Ray(Vec& o, Vec d) { A = o; B = d; }
+  Vec direction() { return B; }    // Deze twee regels
+  Vec origin() { return A; }       // zijn hopelijk overbodig.
+  Vec Point(float t) { return A + B*t; }
 };
 
 /* Utils */
@@ -96,20 +103,33 @@ float SphereTest(Vec p, Vec c, float r) {
   return r - distance;
 }
 
+Vec drawSky(Ray r) {
+  float t = 0.5 * ((!r.direction()).y + 1);
+  return Vec(1,1,1)*(1-t) + Vec(0.5,0.7,1.0)*t;
+}
+
 int main() {
   int w = 200;
   int h = 100;
 
   printf("P6 %d %d 255 ", w, h);
 
+  Vec lower_left_corner(-2,-1,-1);
+  Vec    hor(4,0,0);
+  Vec    ver(0,2,0);
+  Vec origin(0,0,0);
+
   for (int y = h-1; y >= 0; y--) {
     for (int x = 0; x < w; x++) {
-      Vec color(float(x)/float(w),float(y)/float(h),0.2);
+      float u = float(x)/float(w);
+      float v = float(y)/float(h);
+      Ray r(origin, lower_left_corner + hor*u + ver*v);
+      Vec col = drawSky(r);
 
       printf("%c%c%c",
-          int(color.x*255.9),
-          int(color.y*255.9),
-          int(color.z*255.9)
+          int(col.x*255.9),
+          int(col.y*255.9),
+          int(col.z*255.9)
           );
     }
   }
