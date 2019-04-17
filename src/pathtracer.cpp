@@ -104,14 +104,12 @@ int main() {
 
   for (int y = h-1; y >= 0; y--) {
     for (int x = 0; x < w; x++) {
-      float r = float(x)/float(w);
-      float g = float(y)/float(h);
-      float b = 0.2;
+      Vec color(float(x)/float(w),float(y)/float(h),0.2);
 
       printf("%c%c%c",
-          int(r*255.9),
-          int(g*255.9),
-          int(b*255.9)
+          int(color.x*255.9),
+          int(color.y*255.9),
+          int(color.z*255.9)
           );
     }
   }
