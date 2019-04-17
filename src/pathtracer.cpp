@@ -96,129 +96,23 @@ float SphereTest(Vec p, Vec c, float r) {
   return r - distance;
 }
 
-#define HIT_NONE 0
-#define HIT_TABLE 1
-#define HIT_WALL 2
-#define HIT_SUN 3
-
-// Sample the world using Signed Distance Fields.
-float QueryDatabase(Vec position, int &hitType) {
-  float distance = 1e9;
-
-  float roomDist ;
-  roomDist = min(// min(A,B) = Union with Constructive solid geometry
-               //-min carves an empty space
-                -min(// Lower room
-                     BoxTest(position, Vec(-30, -.5, -30), Vec(30, 18, 30)),
-                     // Upper room
-                     BoxTest(position, Vec(-25, 17, -25), Vec(25, 20, 25))
-                ),
-                BoxTest( // Ceiling "planks" spaced 8 units apart.
-                  Vec(fmodf(fabsf(position.x), 8),
-                      position.y,
-                      position.z),
-                  Vec(1.5, 18.5, -25),
-                  Vec(6.5, 20, 25)
-                )
-  );
-  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
-
-  float tableDist ;
-  tableDist = BoxTest(position, Vec(-5, 5, -5), Vec(5, 6, 5));
-  if (tableDist < distance) distance = tableDist, hitType = HIT_TABLE;
-
-  float sun = 19.9 - position.y; // Everything behind 29.9 is light source.
-  if (sun < distance) distance = sun, hitType = HIT_SUN;
-
-  return distance;
-}
-
-// Perform signed sphere marching
-// Returns hitType 0, 1, 2, or 3 and update hit position/normal
-int RayMarching(Vec origin, Vec direction, Vec &hitPos, Vec &hitNorm) {
-  int hitType = HIT_NONE;
-  int noHitCount = 0;
-  float d; // distance from closest object in world.
-
-  // Signed distance marching
-  for (float total_d=0; total_d < 100; total_d += d)
-    if ((d = QueryDatabase(hitPos = origin + direction * total_d, hitType)) < .01
-            || ++noHitCount > 99)
-      return hitNorm =
-         !Vec(QueryDatabase(hitPos + Vec(.01, 0), noHitCount) - d,
-              QueryDatabase(hitPos + Vec(0, .01), noHitCount) - d,
-              QueryDatabase(hitPos + Vec(0, 0, .01), noHitCount) - d)
-         , hitType; // Weird return statement where a variable is also updated.
-  return 0;
-}
-
-Vec Trace(Vec origin, Vec direction) {
-  Vec sampledPosition, normal, color, attenuation = 1;
-  Vec lightDirection(!Vec(.6, .6, 1)); // Directional light
-
-  for (int bounceCount = 2; bounceCount--;) {
-    int hitType = RayMarching(origin, direction, sampledPosition, normal);
-    if (hitType == HIT_NONE) break; // No hit. This is over, return color.
-    if (hitType == HIT_TABLE) { // Specular bounce on a letter. No color acc.
-      direction = direction + normal * ( normal % direction * -2);
-      origin = sampledPosition + direction * 0.1;
-      attenuation = attenuation * 0.2; // Attenuation via distance traveled.
-    }
-    if (hitType == HIT_WALL) { // Wall hit uses color yellow?
-      float incidence = normal % lightDirection;
-      float p = 6.283185 * randomVal();
-      float c = randomVal();
-      float s = sqrtf(1 - c);
-      float g = normal.z < 0 ? -1 : 1;
-      float u = -1 / (g + normal.z);
-      float v = normal.x * normal.y * u;
-      direction = Vec(v,
-                      g + normal.y * normal.y * u,
-                      -normal.y) * (cosf(p) * s)
-                  +
-                  Vec(1 + g * normal.x * normal.x * u,
-                      g * v,
-                      -g * normal.x) * (sinf(p) * s) + normal * sqrtf(c);
-      origin = sampledPosition + direction * .1;
-      attenuation = attenuation * 0.2;
-      if (incidence > 0 &&
-          RayMarching(sampledPosition + normal * .1,
-                      lightDirection,
-                      sampledPosition,
-                      normal) == HIT_SUN)
-        color = color + attenuation * Vec(500, 400, 100) * incidence;
-    }
-    if (hitType == HIT_SUN) { //
-      color = color + attenuation * Vec(50, 80, 100); break; // Sun Color
-    }
-  }
-  return color;
-}
-
 int main() {
-  int w = 960, h = 540, samplesCount = 2;
-  Vec position(20, 5, 25);
-  Vec goal = !(Vec(1, 4, 0) + position * -1);
-  Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
-
-  // Cross-product to get the up vector
-  Vec up(goal.y * left.z - goal.z * left.y,
-         goal.z * left.x - goal.x * left.z,
-         goal.x * left.y - goal.y * left.x);
+  int w = 200;
+  int h = 100;
 
   printf("P6 %d %d 255 ", w, h);
-  for (int y = h; y--;)
-    for (int x = w; x--;) {
-      Vec color;
-      for (int p = samplesCount; p--;)
-        color = color + Trace(position, !(goal + left * (x - w / 2 + randomVal())+
-        up * (y - h / 2 + randomVal())));
 
-      // Reinhard tone mapping
-      color = color * (1. / samplesCount) + 14. / 241;
-      Vec o = color + 1;
-      color = Vec(color.x / o.x, color.y / o.y, color.z / o.z) * 255;
-      printf("%c%c%c", (int) color.x, (int) color.y, (int) color.z);
+  for (int y = h-1; y >= 0; y--) {
+    for (int x = 0; x < w; x++) {
+      float r = float(x)/float(w);
+      float g = float(y)/float(h);
+      float b = 0.2;
+
+      printf("%c%c%c",
+          int(r*255.9),
+          int(g*255.9),
+          int(b*255.9)
+          );
     }
+  }
 }
-
