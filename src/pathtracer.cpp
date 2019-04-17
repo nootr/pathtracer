@@ -75,7 +75,7 @@ struct Ray {
   Ray(Vec& o, Vec d) { A = o; B = d; }
   Vec direction() { return B; }    // Deze twee regels
   Vec origin() { return A; }       // zijn hopelijk overbodig.
-  Vec Point(float t) { return A + B*t; }
+  Vec point(float t) { return A + B*t; }
 };
 
 /* Utils */
@@ -103,9 +103,41 @@ float SphereTest(Vec p, Vec c, float r) {
   return r - distance;
 }
 
-Vec drawSky(Ray r) {
-  float t = 0.5 * ((!r.direction()).y + 1);
-  return Vec(1,1,1)*(1-t) + Vec(0.5,0.7,1.0)*t;
+#define HIT_NONE 0
+#define HIT_SKY  1
+
+float march(Ray r, int& object) {
+  float d = 0;
+
+  while(d < 1e9) {
+    // Determine closest object
+    float closest = 1e9;
+
+    float sky = -SphereTest(r.point(d),Vec(0,0,0),1e3);
+    if (sky < closest) {
+      object = HIT_SKY;
+      closest = sky;
+    }
+
+    // Check if close enough
+    if (closest < 0.01) break;
+
+    // Jump forward and repeat
+    d += closest;
+  }
+
+  return d - 0.1;
+}
+
+Vec trace(Ray r, int bounce) {
+  int object = HIT_NONE;
+  float distance = march(r, object);
+
+  if (object == HIT_SKY) {
+    float t = 0.5*(r.direction().y + 1.0);
+    return Vec(1,1,1)*(1-t) + Vec(0.5,0.7,1)*t;
+  }
+  return Vec(0,0,0);
 }
 
 int main() {
@@ -124,7 +156,7 @@ int main() {
       float u = float(x)/float(w);
       float v = float(y)/float(h);
       Ray r(origin, lower_left_corner + hor*u + ver*v);
-      Vec col = drawSky(r);
+      Vec col = trace(r,3);
 
       printf("%c%c%c",
           int(col.x*255.9),
