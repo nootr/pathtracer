@@ -100,23 +100,31 @@ float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
 float SphereTest(Vec p, Vec c, float r) {
   Vec delta = c + p * -1;
   float distance = sqrtf(delta%delta);
-  return r - distance;
+  return distance - r;
 }
 
-#define HIT_NONE 0
-#define HIT_SKY  1
+#define HIT_NONE  0
+#define HIT_SKY   1
+#define HIT_EARTH 2
 
-float march(Ray r, int& object) {
+float march(Ray r, int& object, Vec& reflection) {
   float d = 0;
 
   while(d < 1e9) {
     // Determine closest object
+    Vec n = r.point(d);
     float closest = 1e9;
 
-    float sky = -SphereTest(r.point(d),Vec(0,0,0),1e3);
+    float sky = -SphereTest(n,Vec(0,0,0),1000);
     if (sky < closest) {
       object = HIT_SKY;
       closest = sky;
+    }
+
+    float earth = SphereTest(n,Vec(0,-999,-1),999);
+    if (earth < closest) {
+      object = HIT_EARTH;
+      closest = earth;
     }
 
     // Check if close enough
@@ -131,11 +139,15 @@ float march(Ray r, int& object) {
 
 Vec trace(Ray r, int bounce) {
   int object = HIT_NONE;
-  float distance = march(r, object);
+  Vec reflection = Vec(0,0,0);
+  float distance = march(r, object, reflection);
 
   if (object == HIT_SKY) {
     float t = 0.5*(r.direction().y + 1.0);
     return Vec(1,1,1)*(1-t) + Vec(0.5,0.7,1)*t;
+  }
+  if (object == HIT_EARTH) {
+    return Vec(0,0.7,0);
   }
   return Vec(0,0,0);
 }
@@ -149,7 +161,7 @@ int main() {
   Vec lower_left_corner(-2,-1,-1);
   Vec    hor(4,0,0);
   Vec    ver(0,2,0);
-  Vec origin(0,0,0);
+  Vec origin(0,1,0);
 
   for (int y = h-1; y >= 0; y--) {
     for (int x = 0; x < w; x++) {
