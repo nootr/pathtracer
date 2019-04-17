@@ -169,8 +169,9 @@ void test() {
 
 int main() {
   test();
-  int w = 200;
-  int h = 100;
+  int w = 200; // width
+  int h = 100; // height
+  int S = 4;   // samples per pixel
 
   printf("P6 %d %d 255 ", w, h);
 
@@ -181,15 +182,18 @@ int main() {
 
   for (int y = h-1; y >= 0; y--) {
     for (int x = 0; x < w; x++) {
-      float u = float(x)/float(w);
-      float v = float(y)/float(h);
-      Ray r(origin, lower_left_corner + hor*u + ver*v);
-      Vec col = trace(r,1);
-
+      Vec color(0,0,0);
+      for (int s = 0; s < S; s++) {
+        float u = (float(x)+randomVal())/float(w);
+        float v = (float(y)+randomVal())/float(h);
+        Ray r(origin, lower_left_corner + hor*u + ver*v);
+        color = color + trace(r,1);
+      }
+      color = color * (1.0/S);
       printf("%c%c%c",
-          int(col.x*255.9),
-          int(col.y*255.9),
-          int(col.z*255.9)
+          int(color.x*255.9),
+          int(color.y*255.9),
+          int(color.z*255.9)
           );
     }
   }
