@@ -1,206 +1,170 @@
-/* Postcard pathtracer by Joris Hartog
- * Based on http://fabiensanglard.net/postcard_pathtracer
- *
- * Renders my office desk with or without my favorite plant Charlie besides it.
- * The following shapes need to be created:
- * * White room minus windows
- * * Blue border(s)
- * * White desk(s)
- * * Black computer screen(s)
- * * Grey cabinet
- * * Brownish grey carpet
- *
- * This means we need CSG equations for:
- * * A sphere (desk cutout)
- * * A box (the rest)
- *
- */
-
-#include <stdlib.h>
+#include <stdlib.h> // card > pixar.ppm
 #include <stdio.h>
 #include <math.h>
 
-// These will be used later
-#define R return
-#define O operator
-typedef float F;typedef int I;
-
-/* Classes */
 struct Vec {
     float x, y, z;
 
     Vec(float v = 0) { x = y = z = v; }
-    Vec(float a, float b, float c = 0) { x = a; y = b; z = c;}
+
+    Vec(float a, float b, float c = 0) {
+      x = a;
+      y = b;
+      z = c;
+    }
 
     Vec operator+(Vec r) { return Vec(x + r.x, y + r.y, z + r.z); }
+
     Vec operator*(Vec r) { return Vec(x * r.x, y * r.y, z * r.z); }
+
     float operator%(Vec r) { return x * r.x + y * r.y + z * r.z; }
-    Vec operator!() {return *this * (1 / sqrtf(*this % *this) );}
-    Vec operator^(Vec r) {return Vec(y*r.z-z*r.y,z*r.x-x*r.z,x*r.y-y*r.x);}
+
+    // intnv square root
+    Vec operator!() {
+      return *this * (1 / sqrtf(*this % *this)
+      );
+    }
 };
 
-struct Ray {
-  Vec d, o; // Direction, origin
-
-  Ray(Vec a, Vec b) { o = a; d = !b; }
-  Vec p(float t) { return o + d*t; }
-};
-
-/* Utils */
 float min(float l, float r) { return l < r ? l : r; }
+
 float randomVal() { return (float) rand() / RAND_MAX; }
 
 // Rectangle CSG equation. Returns minimum signed distance from
-// space carved by lowerLeft vertex and opposite rectangle
-// vertex upperRight.
-float BoxTest(Vec position, Vec lowerLeft, Vec upperRight, Vec& normal) {
+// space carved by
+// lowerLeft vertex and opposite rectangle vertex upperRight.
+float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
   lowerLeft = position + lowerLeft * -1;
   upperRight = upperRight + position * -1;
   return -min(
-    min(
-      min(lowerLeft.x, upperRight.x),
-      min(lowerLeft.y, upperRight.y)
-    ),
-    min(lowerLeft.z, upperRight.z));
+          min(
+                  min(lowerLeft.x, upperRight.x),
+                  min(lowerLeft.y, upperRight.y)),
+          min(lowerLeft.z, upperRight.z));
 }
 
-// Signed distance point(p) to sphere(c,r)
-float SphereTest(Vec p, Vec c, float r, Vec& normal) {
-  Vec delta = p + c * -1;
-  normal = !delta;
-  float distance = sqrtf(delta%delta);
-  return distance - r;
+#define HIT_NONE 0
+#define HIT_BOX 1
+#define HIT_WALL 2
+#define HIT_SUN 3
+
+// Sample the world using Signed Distance Fields.
+float QueryDatabase(Vec position, int &hitType) {
+  float distance = 1e9;
+  Vec f = position; // Flattened position (z=0)
+  f.z = 0;
+
+  distance = BoxTest(position, -0.5, 6);
+  hitType = HIT_BOX;
+
+  float roomDist ;
+  roomDist = -min(// Room
+                  BoxTest(position, Vec(-30, -.5, -30), Vec(30, 18, 30)),
+                  // Window
+                  BoxTest(position, Vec(-10, 4, -32), Vec(10, 10, -29))
+                 );
+  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
+
+  //float sun = 19.9 - position.y ; // Everything above 19.9 is light source.
+  float sun = position.z + 30.0; // Everything above 19.9 is light source.
+  if (sun < distance)distance = sun, hitType = HIT_SUN;
+
+  return distance;
 }
 
-#define HIT_NONE   0
-#define HIT_SKY    1
-#define HIT_EARTH  2
-#define HIT_SPHERE 3
-#define HIT_BOX    4
+// Perform signed sphere marching
+// Returns hitType 0, 1, 2, or 3 and update hit position/normal
+int RayMarching(Vec origin, Vec direction, Vec &hitPos, Vec &hitNorm) {
+  int hitType = HIT_NONE;
+  int noHitCount = 0;
+  float d; // distance from closest object in world.
 
-Ray march(Ray r, int& object) {
-  float d = 0;
-  Vec reflection, n = 1;
-
-  while(d < 1e9) {
-    // Determine closest object
-    Vec m = r.p(d);
-    float closest = 1e9;
-
-    float sky = -SphereTest(m,Vec(0,0,0),1e3,n);
-    if (sky < closest) {
-      object = HIT_SKY;
-      closest = sky;
-    }
-
-    float earth = SphereTest(m,Vec(0,-999,-1),999,n);
-    if (earth < closest) {
-      object = HIT_EARTH;
-      closest = earth;
-    }
-
-    float sphere = SphereTest(m,Vec(1,0.5,-1),0.5,n);
-    if (sphere < closest) {
-      object = HIT_SPHERE;
-      closest = sphere;
-      reflection = r.d + (r.d^n)*n*-2;
-    }
-
-    float box = BoxTest(m,Vec(-1.5,0,-1.5),Vec(-0.5,1,-0.5),n);
-    if (box < closest) {
-      object = HIT_BOX;
-      closest = box;
-    }
-
-    // Check if close enough
-    if (closest < 0.01) break;
-
-    // Jump forward and repeat
-    d += closest;
-  }
-
-  return Ray(r.p(d)+n*0.9, reflection);
+  // Signed distance marching
+  for (float total_d=0; total_d < 100; total_d += d)
+    if ((d = QueryDatabase(hitPos = origin + direction * total_d, hitType)) < .01
+            || ++noHitCount > 99)
+      return hitNorm =
+         !Vec(QueryDatabase(hitPos + Vec(.01, 0), noHitCount) - d,
+              QueryDatabase(hitPos + Vec(0, .01), noHitCount) - d,
+              QueryDatabase(hitPos + Vec(0, 0, .01), noHitCount) - d)
+         , hitType; // Weird return statement where a variable is also updated.
+  return 0;
 }
 
-Vec trace(Ray r, int bounce) {
-  int object = HIT_NONE;
-  Ray reflection = march(r, object);
+Vec Trace(Vec origin, Vec direction) {
+  Vec sampledPosition, normal, color, attenuation = 1;
+  Vec lightDirection(!Vec(.6, .6, -1)); // Directional light
 
-  if (object == HIT_SKY) {
-    float t = 0.5*(r.d.y + 1.0);
-    return Vec(1,1,1)*(1-t) + Vec(0.5,0.7,1)*t;
-  }
-  if (object == HIT_EARTH) {
-    return Vec(0,0.7,0);
-  }
-  if (object == HIT_SPHERE) {
-    //if(bounce > 0) return trace(reflection,bounce-1);
-    return Vec(0,0,1);
-  }
-  if (object == HIT_BOX) {
-    return Vec(0.7,0.1,0.2);
-  }
+  for (int bounceCount = 3; bounceCount--;) {
+  //for (int bounceCount = 2; bounceCount--;) {
+    int hitType = RayMarching(origin, direction, sampledPosition, normal);
+    float incidence = normal % lightDirection;
+    if (hitType == HIT_NONE) break; // No hit. This is over, return color.
+    if (hitType == HIT_BOX) {
+      direction = direction + normal * ( normal % direction * -2);
+      origin = sampledPosition + direction * 0.1;
+      attenuation = attenuation * 0.2; // Attenuation via distance traveled.
+      if (incidence > 0 &&
+          RayMarching(sampledPosition + normal * .1,
+                      lightDirection,
+                      sampledPosition,
+                      normal) == HIT_SUN)
 
-  return Vec(0,0,0);
-}
-
-void test() {
-  fprintf(stderr, "Function/class tests:\n");
-
-  Vec a(0,1,0);
-  Vec b(1,0,0);
-  Vec c = a^b;
-  Vec d = b^a;
-
-  fprintf(stderr, "Cross-product 1.. ");
-  if ((c.x != 0) || (c.y != 0) || (c.z != -1)) {
-    fprintf(stderr, "Not OK!\n");
-  } else {
-    fprintf(stderr, "OK\n");
+        color = color + attenuation * Vec(500,400,100) * incidence;
+    }
+    if (hitType == HIT_WALL) { // Wall hit uses color yellow?
+      float p = 6.283185 * randomVal();
+      float c = randomVal();
+      float s = sqrtf(1 - c);
+      float g = normal.z < 0 ? -1 : 1;
+      float u = -1 / (g + normal.z);
+      float v = normal.x * normal.y * u;
+      direction = Vec(v,
+                      g + normal.y * normal.y * u,
+                      -normal.y) * (cosf(p) * s)
+                  +
+                  Vec(1 + g * normal.x * normal.x * u,
+                      g * v,
+                      -g * normal.x) * (sinf(p) * s) + normal * sqrtf(c);
+      origin = sampledPosition + direction * .1;
+      attenuation = attenuation * 0.2;
+      if (incidence > 0 &&
+          RayMarching(sampledPosition + normal * .1,
+                      lightDirection,
+                      sampledPosition,
+                      normal) == HIT_SUN)
+        color = color + attenuation * Vec(500, 400, 100) * incidence;
+    }
+    if (hitType == HIT_SUN) { //
+      color = color + attenuation * Vec(50, 80, 100); break; // Sun Color
+    }
   }
-
-  fprintf(stderr, "Cross-product 2.. ");
-  if ((d.x != 0) || (d.y != 0) || (d.z != 1)) {
-    fprintf(stderr, "Not OK!\n");
-  } else {
-    fprintf(stderr, "OK\n");
-  }
+  return color;
 }
 
 int main() {
-  test();
-  int h = 200;     // height
-  float a = 4.0/3; // Aspect ratio
-  int S = 4;       // samples per pixel
-  int w = int(h*a);
+//  int w = 960, h = 540, samplesCount = 16;
+  int w = 400, h = 300, samplesCount = 32;
+  Vec position(-22, 5, 25);
+  Vec goal = !(Vec(-3, 4, 0) + position * -1);
+  Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
 
-  Vec origin(-1,2,3);
-  Vec goal(0,0.5,-1);
-
-  Vec r = !(origin + goal * -1);
-  Vec p = !(Vec(0,1,0)^r);
-  Vec q = r^p;
-
-  Vec lower_left_corner = p*(-a) + q*-1 + r*-1;
-  Vec hor = p * 2 * a;
-  Vec ver = q * 2;
+  // Cross-product to get the up vector
+  Vec up(goal.y * left.z - goal.z * left.y,
+      goal.z * left.x - goal.x * left.z,
+      goal.x * left.y - goal.y * left.x);
 
   printf("P6 %d %d 255 ", w, h);
-  for (int y = h-1; y >= 0; y--) {
-    for (int x = 0; x < w; x++) {
-      Vec color(0,0,0);
-      for (int s = 0; s < S; s++) {
-        float u = (x+randomVal())/w;
-        float v = (y+randomVal())/h;
-        Ray r(origin, lower_left_corner + hor*u + ver*v);
-        color = color + trace(r,1);
-      }
-      color = color * (1.0/S);
-      printf("%c%c%c",
-          int(color.x*255.9),
-          int(color.y*255.9),
-          int(color.z*255.9)
-          );
+  for (int y = h; y--;)
+    for (int x = w; x--;) {
+      Vec color;
+      for (int p = samplesCount; p--;)
+        color = color + Trace(position, !(goal + left * (x - w / 2 + randomVal()) + up * (y - h / 2 + randomVal())));
+
+      // Reinhard tone mapping
+      color = color * (1. / samplesCount) + 14. / 241;
+      Vec o = color + 1;
+      color = Vec(color.x / o.x, color.y / o.y, color.z / o.z) * 255;
+      printf("%c%c%c", (int) color.x, (int) color.y, (int) color.z);
     }
-  }
-}
+}// Original by Andrew Kensler
