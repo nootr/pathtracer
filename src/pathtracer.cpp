@@ -1,4 +1,4 @@
-#include <stdlib.h> // card > pixar.ppm
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
@@ -19,7 +19,6 @@ struct Vec {
 
     float operator%(Vec r) { return x * r.x + y * r.y + z * r.z; }
 
-    // intnv square root
     Vec operator!() {
       return *this * (1 / sqrtf(*this % *this)
       );
@@ -30,9 +29,6 @@ float min(float l, float r) { return l < r ? l : r; }
 
 float randomVal() { return (float) rand() / RAND_MAX; }
 
-// Rectangle CSG equation. Returns minimum signed distance from
-// space carved by
-// lowerLeft vertex and opposite rectangle vertex upperRight.
 float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
   lowerLeft = position + lowerLeft * -1;
   upperRight = upperRight + position * -1;
@@ -48,7 +44,6 @@ float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
 #define HIT_WALL 2
 #define HIT_SUN 3
 
-// Sample the world using Signed Distance Fields.
 float QueryDatabase(Vec position, int &hitType) {
   float distance = 1e9;
   Vec f = position; // Flattened position (z=0)
@@ -58,22 +53,20 @@ float QueryDatabase(Vec position, int &hitType) {
   hitType = HIT_BOX;
 
   float roomDist ;
-  roomDist = -min(// Room
-                  BoxTest(position, Vec(-30, -.5, -30), Vec(30, 18, 30)),
-                  // Window
-                  BoxTest(position, Vec(-10, 4, -32), Vec(10, 10, -29))
+  roomDist = min(-min(// Room
+                      BoxTest(position, Vec(-30, -.5, -30), Vec(30, 18, 30)),
+                      // Window
+                      BoxTest(position, Vec(-10, 4, -32), Vec(10, 10, -29))),
+               BoxTest(position, Vec(-0.2, 4, -31), Vec(0.2, 10, -30))
                  );
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  //float sun = 19.9 - position.y ; // Everything above 19.9 is light source.
-  float sun = position.z + 30.0; // Everything above 19.9 is light source.
-  if (sun < distance)distance = sun, hitType = HIT_SUN;
+  float sun = position.z + 30.0;
+  if (sun < distance) distance = sun, hitType = HIT_SUN;
 
   return distance;
 }
 
-// Perform signed sphere marching
-// Returns hitType 0, 1, 2, or 3 and update hit position/normal
 int RayMarching(Vec origin, Vec direction, Vec &hitPos, Vec &hitNorm) {
   int hitType = HIT_NONE;
   int noHitCount = 0;
@@ -135,7 +128,7 @@ Vec Trace(Vec origin, Vec direction) {
                       normal) == HIT_SUN)
         color = color + attenuation * Vec(500, 400, 100) * incidence;
     }
-    if (hitType == HIT_SUN) { //
+    if (hitType == HIT_SUN) {
       color = color + attenuation * Vec(50, 80, 100); break; // Sun Color
     }
   }
@@ -144,7 +137,7 @@ Vec Trace(Vec origin, Vec direction) {
 
 int main() {
 //  int w = 960, h = 540, samplesCount = 16;
-  int w = 400, h = 300, samplesCount = 32;
+  int w = 960, h = 540, samplesCount = 128;
   Vec position(-22, 5, 25);
   Vec goal = !(Vec(-3, 4, 0) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
@@ -167,4 +160,4 @@ int main() {
       color = Vec(color.x / o.x, color.y / o.y, color.z / o.z) * 255;
       printf("%c%c%c", (int) color.x, (int) color.y, (int) color.z);
     }
-}// Original by Andrew Kensler
+}
