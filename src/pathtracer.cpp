@@ -43,13 +43,12 @@ float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
 #define HIT_BOX 1
 #define HIT_WALL 2
 #define HIT_SUN 3
+#define HIT_MIRROR 4
 
 float QueryDatabase(Vec position, int &hitType) {
   float distance = 1e9;
-  Vec f = position; // Flattened position (z=0)
-  f.z = 0;
 
-  distance = BoxTest(position, -0.5, 6);
+  distance = BoxTest(position, -0.5, 3);
   hitType = HIT_BOX;
 
   float roomDist ;
@@ -60,6 +59,10 @@ float QueryDatabase(Vec position, int &hitType) {
                BoxTest(position, Vec(-0.2, 4, -31), Vec(0.2, 10, -30))
                  );
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
+
+  float mirrorDist;
+  mirrorDist = BoxTest(position, Vec(29.5, 2, -16), Vec(30, 9, -13));
+  if (mirrorDist < distance) distance = mirrorDist, hitType = HIT_MIRROR;
 
   float sun = position.z + 30.5;
   if (sun < distance) distance = sun, hitType = HIT_SUN;
@@ -93,6 +96,10 @@ Vec Trace(Vec origin, Vec direction) {
     int hitType = RayMarching(origin, direction, sampledPosition, normal);
     float incidence = normal % lightDirection;
     if (hitType == HIT_NONE) break; // No hit. This is over, return color.
+    if (hitType == HIT_MIRROR) {
+      direction = direction + normal * ( normal % direction * -2);
+      origin = sampledPosition + direction * 0.1;
+    }
     if (hitType == HIT_BOX) {
       direction = direction + normal * ( normal % direction * -2);
       origin = sampledPosition + direction * 0.1;
@@ -102,7 +109,6 @@ Vec Trace(Vec origin, Vec direction) {
                       lightDirection,
                       sampledPosition,
                       normal) == HIT_SUN)
-
         color = color + attenuation * Vec(500,400,100) * incidence;
     }
     if (hitType == HIT_WALL) { // Wall hit uses color yellow?
@@ -136,8 +142,8 @@ Vec Trace(Vec origin, Vec direction) {
 }
 
 int main() {
-//  int w = 960, h = 540, samplesCount = 16;
   int w = 960, h = 540, samplesCount = 64;
+//  int w = 480, h = 270, samplesCount = 4;
   Vec position(-22, 5, 25);
   Vec goal = !(Vec(-3, 4, 0) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
