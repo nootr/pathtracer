@@ -61,7 +61,7 @@ float QueryDatabase(Vec position, int &hitType) {
                  );
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  float sun = position.z + 30.0;
+  float sun = position.z + 30.5;
   if (sun < distance) distance = sun, hitType = HIT_SUN;
 
   return distance;
@@ -137,7 +137,7 @@ Vec Trace(Vec origin, Vec direction) {
 
 int main() {
 //  int w = 960, h = 540, samplesCount = 16;
-  int w = 960, h = 540, samplesCount = 128;
+  int w = 960, h = 540, samplesCount = 64;
   Vec position(-22, 5, 25);
   Vec goal = !(Vec(-3, 4, 0) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
