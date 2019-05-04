@@ -29,6 +29,11 @@ float min(float l, float r) { return l < r ? l : r; }
 
 float randomVal() { return (float) rand() / RAND_MAX; }
 
+float SphereTest(Vec position, Vec center, float radius) {
+  Vec delta = position + center * -1;
+  return delta % delta - radius;
+}
+
 float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
   lowerLeft = position + lowerLeft * -1;
   upperRight = upperRight + position * -1;
@@ -44,6 +49,7 @@ float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
 #define HIT_WALL 2
 #define HIT_SUN 3
 #define HIT_MIRROR 4
+#define HIT_BULB 5
 
 float QueryDatabase(Vec position, int &hitType) {
   float distance = 1e9;
@@ -63,6 +69,10 @@ float QueryDatabase(Vec position, int &hitType) {
   float mirrorDist;
   mirrorDist = BoxTest(position, Vec(29.5, 2, -16), Vec(30, 9, -13));
   if (mirrorDist < distance) distance = mirrorDist, hitType = HIT_MIRROR;
+
+  float bulbDist;
+  bulbDist = SphereTest(position, Vec(5, 18, 0), 1);
+  if (bulbDist < distance) distance = bulbDist, hitType = HIT_BULB;
 
   float sun = position.z + 30.5;
   if (sun < distance) distance = sun, hitType = HIT_SUN;
@@ -133,6 +143,9 @@ Vec Trace(Vec origin, Vec direction) {
                       sampledPosition,
                       normal) == HIT_SUN)
         color = color + attenuation * Vec(500, 400, 100) * incidence;
+    }
+    if (hitType == HIT_BULB) {
+      color = color + attenuation * Vec(500); break;
     }
     if (hitType == HIT_SUN) {
       color = color + attenuation * Vec(50, 80, 100); break; // Sun Color
