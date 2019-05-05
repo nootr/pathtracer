@@ -155,7 +155,7 @@ Vec Trace(Vec origin, Vec direction) {
 }
 
 int main() {
-  int w = 960, h = 540, samplesCount = 64;
+  int w = 960, h = 540, samplesCount = 256;
 //  int w = 480, h = 270, samplesCount = 4;
   Vec position(-22, 5, 25);
   Vec goal = !(Vec(-3, 4, 0) + position * -1);
