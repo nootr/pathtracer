@@ -45,18 +45,16 @@ float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
 #define HIT_SUN 3
 
 float QueryDatabase(Vec position, int &hitType) {
-  float distance = 1e9;
   Vec dup = position; // Used to duplicate window
   while (dup.z > 1 && dup.z < 18) dup.z -= 8;
 
-  distance = BoxTest(position, Vec(3, 2.7, -7.8), Vec(7, 5, -7.6));
+  float distance = BoxTest(position, Vec(2.5, 2.6, -8.8), Vec(6.5, 5, -8.6));
   hitType = HIT_TV;
 
-  float roomDist ;
-  roomDist = -min(// Room
-                  BoxTest(dup, Vec(0, 0, -8), Vec(10, 12, 18)),
-                  // Window
-                  BoxTest(dup, Vec(9, 3, -6), Vec(13, 10, 0)));
+  float roomDist = -min(// Room
+                        BoxTest(dup, Vec(-1, 0, -9), Vec(10, 12, 18)),
+                        // Window
+                        BoxTest(dup, Vec(9, 3, -6), Vec(13, 10, 0)));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   /* COMPRESSION START */
@@ -90,7 +88,7 @@ float QueryDatabase(Vec position, int &hitType) {
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   // Locker, TODO: details
-  roomDist = BoxTest(position, Vec(2, 0.5, -7.8), Vec(8, 2.5, -6));
+  roomDist = BoxTest(position, Vec(2, 0.5, -8.8), Vec(7, 2.5, -7.2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   /* COMPRESSION END */
@@ -163,8 +161,8 @@ Vec Trace(Vec origin, Vec direction) {
 }
 
 int main() {
-  int w = 960, h = 540, samplesCount = 64;
-//  int w = 480, h = 270, samplesCount = 2;
+//  int w = 960, h = 540, samplesCount = 64;
+  int w = 480, h = 270, samplesCount = 2;
   Vec position(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
