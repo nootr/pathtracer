@@ -48,7 +48,7 @@ float QueryDatabase(Vec position, int &hitType) {
   Vec dup = position; // Used to duplicate window
   while (dup.z > 1 && dup.z < 18) dup.z -= 8;
 
-  float distance = BoxTest(position, Vec(2.5, 2.6, -8.8), Vec(6.5, 5, -8.6));
+  float distance = BoxTest(position, Vec(2.2, 2.6, -8.8), Vec(6.8, 5, -8.6));
   hitType = HIT_TV;
 
   float roomDist = -min(// Room
@@ -88,19 +88,13 @@ float QueryDatabase(Vec position, int &hitType) {
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   // Locker
-  roomDist = BoxTest(position, Vec(2, 0.5, -8.8), Vec(2.2, 2.5, -7.2));
+  roomDist = BoxTest(position, Vec(2, 0.5, -8.8), Vec(2.1, 2.5, -7.2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = BoxTest(position, Vec(4.4, 0.5, -8.8), Vec(4.6, 2.5, -7.2));
+  roomDist = BoxTest(position, Vec(4.45, 0.5, -8.8), Vec(4.55, 2.5, -7.2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = BoxTest(position, Vec(6.8, 0.5, -8.8), Vec(7, 2.5, -7.2));
-  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
-
-  roomDist = BoxTest(position, Vec(2.3, 0.8, -8.8), Vec(4.3, 2.1, -7.2));
-  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
-
-  roomDist = BoxTest(position, Vec(4.7, 0.8, -8.8), Vec(6.7, 2.1, -7.2));
+  roomDist = BoxTest(position, Vec(6.9, 0.5, -8.8), Vec(7, 2.5, -7.2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   roomDist = BoxTest(position, Vec(2, 2.2, -8.8), Vec(7, 2.5, -7.2));
@@ -109,19 +103,25 @@ float QueryDatabase(Vec position, int &hitType) {
   roomDist = BoxTest(position, Vec(2, 0.5, -8.8), Vec(7, 0.7, -7.2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = BoxTest(position, Vec(2, 0, -7.4), Vec(2.2, 1, -7.2));
+  roomDist = BoxTest(position, Vec(2, 0, -7.4), Vec(2.1, 1, -7.2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = BoxTest(position, Vec(6.8, 0, -7.4), Vec(7, 1, -7.2));
+  roomDist = BoxTest(position, Vec(6.9, 0, -7.4), Vec(7, 1, -7.2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = BoxTest(position, Vec(2, 0, -8.8), Vec(2.2, 1, -8.6));
+  roomDist = BoxTest(position, Vec(2, 0, -8.8), Vec(2.1, 1, -8.6));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = BoxTest(position, Vec(6.8, 0, -8.8), Vec(7, 1, -8.6));
+  roomDist = BoxTest(position, Vec(6.9, 0, -8.8), Vec(7, 1, -8.6));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   /* COMPRESSION END */
+
+  roomDist = min(
+      BoxTest(position, Vec(2.11, 0.71, -8.8), Vec(4.44, 2.19, -7.2)),
+      BoxTest(position, Vec(4.56, 0.71, -8.8), Vec(6.89, 2.19, -7.2))
+      );
+  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   float sun = 11 - position.x;
   if (sun < distance) distance = sun, hitType = HIT_SUN;
@@ -191,8 +191,8 @@ Vec Trace(Vec origin, Vec direction) {
 }
 
 int main() {
-  int w = 960, h = 540, samplesCount = 32;
-//  int w = 480, h = 270, samplesCount = 2;
+//  int w = 960, h = 540, samplesCount = 32;
+  int w = 480, h = 270, samplesCount = 2;
   Vec position(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
