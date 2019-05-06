@@ -61,27 +61,30 @@ float QueryDatabase(Vec position, int &hitType) {
 
   /* COMPRESSION START */
 
-  roomDist = BoxTest(dup, Vec(10.3, 3, -8), Vec(10.4, 10, -7.4));
+  roomDist = BoxTest(dup, Vec(10.7, 3, -8), Vec(10.8, 10, -7.4));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = BoxTest(dup, Vec(10.3, 3, -2.6), Vec(10.4, 10, -2));
+  roomDist = BoxTest(dup, Vec(10.7, 3, -2.6), Vec(10.8, 10, -2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = BoxTest(dup, Vec(10.3, 3, -8), Vec(10.4, 3.6, -2));
+  roomDist = BoxTest(dup, Vec(10.7, 3, -8), Vec(10.8, 3.6, -2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = BoxTest(dup, Vec(10.3, 9.4, -8), Vec(10.4, 10, -2));
+  roomDist = BoxTest(dup, Vec(10.7, 9.4, -8), Vec(10.8, 10, -2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = BoxTest(dup, Vec(10.3, 3, -5.1), Vec(10.4, 10, -4.9));
+  roomDist = BoxTest(dup, Vec(10.7, 3, -5.2), Vec(10.8, 6.5, -4.8));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = BoxTest(dup, Vec(10.3, 6.3, -8), Vec(10.4, 6.7, -2));
+  roomDist = BoxTest(dup, Vec(10.9, 6.5, -5.2), Vec(11, 10, -4.8));
+  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
+
+  roomDist = BoxTest(dup, Vec(10.7, 6.3, -8), Vec(10.8, 6.7, -2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   /* COMPRESSION END */
 
-  float sun = 10.5 - position.x;
+  float sun = 11 - position.x;
   if (sun < distance) distance = sun, hitType = HIT_SUN;
 
   return distance;
@@ -106,7 +109,7 @@ int RayMarching(Vec origin, Vec direction, Vec &hitPos, Vec &hitNorm) {
 
 Vec Trace(Vec origin, Vec direction) {
   Vec sampledPosition, normal, color, attenuation = 1;
-  Vec lightDirection(!Vec(2,3,8)); // Directional light
+  Vec lightDirection(!Vec(3,3,9)); // Directional light
 
   for (int bounceCount = 3; bounceCount--;) {
   //for (int bounceCount = 2; bounceCount--;) {
@@ -117,12 +120,6 @@ Vec Trace(Vec origin, Vec direction) {
       direction = direction + normal * ( normal % direction * -2);
       origin = sampledPosition + direction * 0.1;
       attenuation = attenuation * 0.2; // Attenuation via distance traveled.
-      if (incidence > 0 &&
-          RayMarching(sampledPosition + normal * .1,
-                      lightDirection,
-                      sampledPosition,
-                      normal) == HIT_SUN)
-        color = color + attenuation * Vec(500,400,100) * incidence;
     }
     if (hitType == HIT_WALL) { // Wall hit uses color yellow?
       float p = 6.283185 * randomVal();
@@ -155,8 +152,8 @@ Vec Trace(Vec origin, Vec direction) {
 }
 
 int main() {
-//  int w = 960, h = 540, samplesCount = 64;
-  int w = 480, h = 270, samplesCount = 2;
+  int w = 960, h = 540, samplesCount = 256;
+//  int w = 480, h = 270, samplesCount = 2;
   Vec position(1, 5, 6);
   Vec goal = !(Vec(8, 4, -10) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
