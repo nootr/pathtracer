@@ -163,8 +163,8 @@ Vec Trace(Vec origin, Vec direction) {
 }
 
 int main() {
-//  int w = 960, h = 540, samplesCount = 256;
-  int w = 480, h = 270, samplesCount = 2;
+  int w = 960, h = 540, samplesCount = 64;
+//  int w = 480, h = 270, samplesCount = 2;
   Vec position(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
