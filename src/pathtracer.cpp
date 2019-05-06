@@ -91,6 +91,18 @@ float QueryDatabase(Vec position, int &hitType) {
   roomDist = BoxTest(position, Vec(2, 0.5, -8.8), Vec(7, 2.5, -7.2));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
+  roomDist = BoxTest(position, Vec(2, 0, -7.4), Vec(2.2, 1, -7.2));
+  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
+
+  roomDist = BoxTest(position, Vec(6.8, 0, -7.4), Vec(7, 1, -7.2));
+  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
+
+  roomDist = BoxTest(position, Vec(2, 0, -8.8), Vec(2.2, 1, -8.6));
+  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
+
+  roomDist = BoxTest(position, Vec(6.8, 0, -8.8), Vec(7, 1, -8.6));
+  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
+
   /* COMPRESSION END */
 
   float sun = 11 - position.x;
