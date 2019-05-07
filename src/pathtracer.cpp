@@ -121,8 +121,8 @@ float QueryDatabase(Vec position, int &hitType) {
   /* COMPRESSION END */
 
   roomDist = min(
-      BoxTest(position, Vec(2.13, 0.61, -8.8), Vec(4.42, 2.29, -7.2)),
-      BoxTest(position, Vec(4.58, 0.61, -8.8), Vec(6.87, 2.29, -7.2))
+      BoxTest(position, Vec(2.14, 0.64, -8.8), Vec(4.41, 2.26, -7.2)),
+      BoxTest(position, Vec(4.59, 0.64, -8.8), Vec(6.86, 2.26, -7.2))
       );
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
@@ -194,7 +194,7 @@ Vec Trace(Vec origin, Vec direction) {
 }
 
 int main() {
-  int w = 960, h = 540, samplesCount = 32;
+  int w = 960, h = 540, samplesCount = 256;
 //  int w = 480, h = 270, samplesCount = 2;
   Vec position(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + position * -1);
