@@ -41,18 +41,19 @@ float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
 
 #define HIT_NONE 0
 #define HIT_TV 1
-#define HIT_WALL 2
-#define HIT_SUN 3
+#define HIT_SUN 2
+#define HIT_WALL 3
+#define HIT_KNOB 4
 
 float QueryDatabase(Vec position, int &hitType) {
   Vec dup = position; // Used to duplicate window
-  while (dup.z > 1 && dup.z < 18) dup.z -= 8;
+  while (dup.z > 1 && dup.z < 17) dup.z -= 8;
 
   float distance = BoxTest(position, Vec(2.2, 2.6, -8.8), Vec(6.8, 5, -8.6));
   hitType = HIT_TV;
 
   float roomDist = -min(// Room
-                        BoxTest(dup, Vec(-1, 0, -9), Vec(10, 12, 18)),
+                        BoxTest(dup, Vec(-1, 0, -9), Vec(10, 12, 17)),
                         // Window
                         BoxTest(dup, Vec(9, 3, -6), Vec(13, 10, 0)));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
@@ -60,7 +61,7 @@ float QueryDatabase(Vec position, int &hitType) {
   /* COMPRESSION START */
 
   // Window
-  if (BoxTest(dup, Vec(10.5, 3, -6), Vec(11, 10, 0)) < 0.5) {
+  if (BoxTest(dup, Vec(10.5, 3, -6), Vec(11, 10, 0)) < 3) {
     roomDist = BoxTest(dup, Vec(10.7, 3, -6), Vec(10.8, 6.7, -5.4));
     if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
@@ -90,7 +91,7 @@ float QueryDatabase(Vec position, int &hitType) {
   }
 
   // Locker
-  if (BoxTest(position, Vec(2, 0, -8.8), Vec(7, 2.5, -7.2)) < 0.5) {
+  if (BoxTest(position, Vec(2, 0, -8.8), Vec(7, 2.5, -6.7)) < 3) {
     roomDist = BoxTest(position, Vec(2, 0.5, -8.8), Vec(2.1, 2.5, -7.2));
     if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
@@ -118,6 +119,14 @@ float QueryDatabase(Vec position, int &hitType) {
     roomDist = BoxTest(position, Vec(6.9, 0, -8.8), Vec(7, 1, -8.6));
     if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
   }
+
+  roomDist = min(
+      BoxTest(position, Vec(4.2, 1.4, -7.2), Vec(4.3, 1.5, -7.1)),
+      BoxTest(position, Vec(4.7, 1.4, -7.2), Vec(4.8, 1.5, -7.1))
+      );
+  if (roomDist < distance) distance = roomDist, hitType = HIT_KNOB;
+
+
   /* COMPRESSION END */
 
   roomDist = min(
@@ -154,16 +163,14 @@ Vec Trace(Vec origin, Vec direction) {
   Vec lightDirection(!Vec(3,3,9)); // Directional light
 
   for (int bounceCount = 3; bounceCount--;) {
-  //for (int bounceCount = 2; bounceCount--;) {
     int hitType = RayMarching(origin, direction, sampledPosition, normal);
     float incidence = normal % lightDirection;
-    //if (hitType == HIT_NONE) break; // No hit. Should not be possible.
     if (hitType == HIT_TV) {
       direction = direction + normal * ( normal % direction * -2);
       origin = sampledPosition + direction * 0.1;
       attenuation = attenuation * 0.2; // Attenuation via distance traveled.
     }
-    if (hitType == HIT_WALL) { // Wall hit uses color yellow?
+    if (hitType >= HIT_WALL) { // Wall or knob
       float p = 6.283185 * randomVal();
       float c = randomVal();
       float s = sqrtf(1 - c);
@@ -183,9 +190,13 @@ Vec Trace(Vec origin, Vec direction) {
           RayMarching(sampledPosition + normal * .1,
                       lightDirection,
                       sampledPosition,
-                      normal) == HIT_SUN)
-        color = color + attenuation * Vec(500, 400, 100) * incidence;
+                      normal) == HIT_SUN) {
+          color = color + attenuation
+            * (hitType == HIT_KNOB ? Vec(10) : Vec(500, 400, 100))
+            * incidence;
+      }
     }
+    if (hitType == HIT_KNOB) break;
     if (hitType == HIT_SUN) {
       color = color + attenuation * Vec(50, 80, 100); break; // Sun Color
     }
@@ -194,8 +205,8 @@ Vec Trace(Vec origin, Vec direction) {
 }
 
 int main() {
-  int w = 960, h = 540, samplesCount = 256;
-//  int w = 480, h = 270, samplesCount = 2;
+  int w = 960, h = 540, samplesCount = 64;
+//  int w = 480, h = 270, samplesCount = 4;
   Vec position(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
