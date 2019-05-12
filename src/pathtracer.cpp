@@ -52,13 +52,13 @@ float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
 
 float QueryDatabase(Vec position, int &hitType) {
   Vec dup = position; // Used to duplicate window
-  while (dup.z > 1 && dup.z < 16.9) dup.z -= 8;
+  while (dup.z > 1 && dup.z < 16) dup.z -= 8;
 
   float distance = BoxTest(position, Vec(2.2, 2.6, -8.8), Vec(6.8, 5, -8.6));
   hitType = HIT_TV;
 
   float roomDist = -min(// Room
-                        BoxTest(dup, Vec(-1, 0, -9), Vec(10, 12, 17)),
+                        BoxTest(dup, Vec(-1, 0, -9), Vec(10, 12, 21)),
                         // Window
                         BoxTest(dup, Vec(9, 3, -6), Vec(13, 10, 0)));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
@@ -179,7 +179,7 @@ Vec Trace(Vec origin, Vec direction) {
       direction = direction + normal * ( normal % direction * -2);
       origin = sampledPosition + direction * 0.1;
       if (hitType == HIT_TV) {
-        attenuation = attenuation * 0.2; // Attenuation via distance traveled.
+        attenuation = attenuation * 0.1; // Attenuation via distance traveled.
       } else {
         attenuation = attenuation * 0.6; // Attenuation via distance traveled.
         direction = !(direction + Vec(randomVal(),randomVal(),randomVal())*0.2);
@@ -217,7 +217,7 @@ Vec Trace(Vec origin, Vec direction) {
 }
 
 int main() {
-  int w = 960, h = 540, samplesCount = 128;
+  int w = 960, h = 540, samplesCount = 256;
 //  int w = 480, h = 270, samplesCount = 8;
   Vec position(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + position * -1);
