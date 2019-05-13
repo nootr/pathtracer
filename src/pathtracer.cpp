@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <thread>
+
+#define R return
+#define O operator
+typedef float F;typedef int I;typedef std::thread T;
 
 struct Vec {
     float x, y, z;
@@ -27,7 +32,7 @@ struct Vec {
 
 float min(float l, float r) { return l < r ? l : r; }
 
-float randomVal() { return (float) rand() / RAND_MAX; }
+float r() { return (float) rand() / RAND_MAX; }
 
 float SphereTest(Vec position, Vec center, float radius) {
   Vec delta = position + center * -1;
@@ -66,7 +71,8 @@ float QueryDatabase(Vec position, int &hitType) {
   /* COMPRESSION START */
 
   // Window
-  if (BoxTest(dup, Vec(10.5, 3, -6), Vec(11, 10, 0)) < 1) {
+  roomDist = BoxTest(dup, Vec(10.7, 3, -6), Vec(11, 10, 0));
+  if (roomDist < 1) {
     roomDist = BoxTest(dup, Vec(10.7, 3, -6), Vec(10.8, 6.7, -5.4));
     if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
@@ -92,11 +98,12 @@ float QueryDatabase(Vec position, int &hitType) {
     if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
     roomDist = BoxTest(dup, Vec(10.7, 6.3, -6), Vec(10.8, 6.7, 0));
-    if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
   }
+  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   // Locker
-  if (BoxTest(position, Vec(2, 0, -8.8), Vec(7, 2.5, -6.7)) < 1) {
+  roomDist = BoxTest(position, Vec(2, 0, -8.8), Vec(7, 2.5, -7.2));
+  if (roomDist < 1) {
     roomDist = BoxTest(position, Vec(2, 0.5, -8.8), Vec(2.1, 2.5, -7.2));
     if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
@@ -122,8 +129,8 @@ float QueryDatabase(Vec position, int &hitType) {
     if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
     roomDist = BoxTest(position, Vec(6.9, 0, -8.8), Vec(7, 1, -8.6));
-    if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
   }
+  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   roomDist = min(
       -min(
@@ -182,12 +189,12 @@ Vec Trace(Vec origin, Vec direction) {
         attenuation = attenuation * 0.1; // Attenuation via distance traveled.
       } else {
         attenuation = attenuation * 0.6; // Attenuation via distance traveled.
-        direction = !(direction + Vec(randomVal(),randomVal(),randomVal())*0.2);
+        direction = !(direction + Vec(r(),r(),r())*0.2);
       }
     }
     if (hitType == HIT_WALL) {
-      float p = 6.283185 * randomVal();
-      float c = randomVal();
+      float p = 6.283185 * r();
+      float c = r();
       float s = sqrtf(1 - c);
       float g = normal.z < 0 ? -1 : 1;
       float u = -1 / (g + normal.z);
@@ -216,11 +223,13 @@ Vec Trace(Vec origin, Vec direction) {
   return color;
 }
 
+void t(Vec* a,Vec b,Vec c){*a=*a+Trace(b,c);}
+
 int main() {
-  int w = 960, h = 540, samplesCount = 256;
-//  int w = 480, h = 270, samplesCount = 8;
-  Vec position(1, 5, 9);
-  Vec goal = !(Vec(8, 4, -8) + position * -1);
+//  int w = 960, h = 540, samplesCount = 256;
+  int w = 480, h = 270, samplesCount = 4;
+  Vec pos(1, 5, 9);
+  Vec goal = !(Vec(8, 4, -8) + pos * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
 
   // Cross-product to get the up vector
@@ -228,17 +237,22 @@ int main() {
       goal.z * left.x - goal.x * left.z,
       goal.x * left.y - goal.y * left.x);
 
+  // Create array of threads
+  T** threads = (T**)malloc(sizeof(T*)*samplesCount);
+
   printf("P6 %d %d 255 ", w, h);
   for (int y = h; y--;)
     for (int x = w; x--;) {
-      Vec color;
+      Vec col;
       for (int p = samplesCount; p--;)
-        color = color + Trace(position, !(goal + left * (x - w / 2 + randomVal()) + up * (y - h / 2 + randomVal())));
+        threads[p] = new T(t,&col,pos,!(goal+left*(x-w/2+r())+up*(y-h/2+r())));
+      for (int p = samplesCount; p--;)
+        threads[p]->join();
 
       // Reinhard tone mapping
-      color = color * (1. / samplesCount) + 14. / 241;
-      Vec o = color + 1;
-      color = Vec(color.x / o.x, color.y / o.y, color.z / o.z) * 255;
-      printf("%c%c%c", (int) color.x, (int) color.y, (int) color.z);
+      col = col * (1. / samplesCount) + 14. / 241;
+      Vec o = col + 1;
+      col = Vec(col.x / o.x, col.y / o.y, col.z / o.z) * 255;
+      printf("%c%c%c", (int) col.x, (int) col.y, (int) col.z);
     }
 }
