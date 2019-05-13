@@ -1,12 +1,6 @@
 # Pathtracer
 
-Sources:
-* http://fabiensanglard.net/postcard_pathtracer
-
-TODO:
-[ ] Create PoC in Python
-[ ] Port to C++
-[ ] Obfuscate and shorten as much as possible
+A codegolf renderer. The goal is to render my living room in under 1kB of code.
 
 ```bash
 $ make
