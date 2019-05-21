@@ -27,6 +27,7 @@ struct Vec {
     Vec operator!() {
       return *this * (1 / sqrtf(*this % *this)
       );
+
     }
 };
 
@@ -49,11 +50,26 @@ float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
           min(lowerLeft.z, upperRight.z));
 }
 
+float CilinderTest(Vec position, Vec bottom, float height, float width) {
+  Vec delta = position + bottom * -1;
+  delta.y = 0;
+
+  Vec down = position + bottom * -1;
+  Vec up = bottom + Vec(0, height, 0) + position * -1;
+
+  return -min(
+      width - sqrtf(delta % delta),
+      min(down.y, up.y)
+      );
+}
+
 #define HIT_NONE 0
 #define HIT_SUN 1
 #define HIT_WALL 2
-#define HIT_TV 3
-#define HIT_KNOB 4
+#define HIT_COUCH 3
+#define HIT_LAMP 4
+#define HIT_TV 5
+#define HIT_KNOB 6
 
 float QueryDatabase(Vec position, int &hitType) {
   Vec dup = position; // Used to duplicate window
@@ -67,8 +83,6 @@ float QueryDatabase(Vec position, int &hitType) {
                         // Window
                         BoxTest(dup, Vec(9, 3, -6), Vec(13, 10, 0)));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
-
-  /* COMPRESSION START */
 
   // Window
   roomDist = BoxTest(dup, Vec(10.7, 3, -6), Vec(11, 10, 0));
@@ -144,13 +158,31 @@ float QueryDatabase(Vec position, int &hitType) {
       );
   if (roomDist < distance) distance = roomDist, hitType = HIT_KNOB;
 
-  /* COMPRESSION END */
+  roomDist = min(min(
+      -min(
+      -BoxTest(position, Vec(7.5, 6.5, -8.5), Vec(9.5, 6.8, -6.5)),
+      -SphereTest(position, Vec(8.5, 8, -7.5), 1.5)
+      ),
+      CilinderTest(position, Vec(8.5, 0, -7.5), 6.5, 0.03)
+      ),
+      CilinderTest(position, Vec(8.5, 0, -7.5), 0.1, 0.6)
+      );
+  if (roomDist < distance) distance = roomDist, hitType = HIT_LAMP;
 
   roomDist = min(
       BoxTest(position, Vec(2.14, 0.64, -8.8), Vec(4.41, 2.26, -7.2)),
       BoxTest(position, Vec(4.59, 0.64, -8.8), Vec(6.86, 2.26, -7.2))
       );
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
+
+  roomDist = -min(
+    -min(
+      BoxTest(position, Vec(2.5, 0.2, 3), Vec(9.7, 2.7, 7)),
+      BoxTest(position, Vec(3.5, 1, 2.7), Vec(8.7, 3, 7))
+      ),
+    BoxTest(position, Vec(2.9, 2, 2), Vec(8.8, 4, 6))
+    );
+  if (roomDist < distance) distance = roomDist, hitType = HIT_COUCH;
 
   float sun = 11 - position.x;
   if (sun < distance) distance = sun, hitType = HIT_SUN;
@@ -186,13 +218,13 @@ Vec Trace(Vec origin, Vec direction) {
       direction = direction + normal * ( normal % direction * -2);
       origin = sampledPosition + direction * 0.1;
       if (hitType == HIT_TV) {
-        attenuation = attenuation * 0.1; // Attenuation via distance traveled.
+        attenuation = attenuation * 0.05; // Attenuation via distance traveled.
       } else {
         attenuation = attenuation * 0.6; // Attenuation via distance traveled.
         direction = !(direction + Vec(r(),r(),r())*0.2);
       }
     }
-    if (hitType == HIT_WALL) {
+    if (hitType >= HIT_WALL && hitType <= HIT_LAMP) {
       float p = 6.283185 * r();
       float c = r();
       float s = sqrtf(1 - c);
@@ -207,17 +239,18 @@ Vec Trace(Vec origin, Vec direction) {
                       g * v,
                       -g * normal.x) * (sinf(p) * s) + normal * sqrtf(c);
       origin = sampledPosition + direction * .1;
-      attenuation = attenuation * 0.2;
+      attenuation = attenuation * (hitType == HIT_LAMP?0.01:0.2);
       if (incidence > 0 &&
           RayMarching(sampledPosition + normal * .1,
                       lightDirection,
                       sampledPosition,
-                      normal) == HIT_SUN) {
-          color = color + attenuation * Vec(500, 400, 100) * incidence;
-      }
+                      normal) == HIT_SUN)
+          color = color + attenuation * (
+              hitType == HIT_COUCH?Vec(200, 600, 400):Vec(500, 400, 100)
+              ) * incidence;
     }
     if (hitType == HIT_SUN) {
-      color = color + attenuation * Vec(50, 80, 100); break; // Sun Color
+      color = color + attenuation * Vec(50, 80, 100); break;
     }
   }
   return color;
@@ -226,8 +259,8 @@ Vec Trace(Vec origin, Vec direction) {
 void t(Vec* a,Vec b,Vec c){*a=*a+Trace(b,c);}
 
 int main() {
-//  int w = 960, h = 540, samplesCount = 256;
-  int w = 480, h = 270, samplesCount = 4;
+  int w = 960, h = 540, samplesCount = 128;
+//  int w = 480, h = 270, samplesCount = 16;
   Vec pos(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + pos * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
