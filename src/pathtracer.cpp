@@ -32,6 +32,7 @@ struct Vec {
 };
 
 float min(float l, float r) { return l < r ? l : r; }
+float max(float l, float r) { return l > r ? l : r; }
 
 float r() { return (float) rand() / RAND_MAX; }
 
@@ -78,10 +79,10 @@ float QueryDatabase(Vec position, int &hitType) {
   float distance = BoxTest(position, Vec(2.2, 2.6, -8.8), Vec(6.8, 5, -8.6));
   hitType = HIT_TV;
 
-  float roomDist = -min(// Room
-                        BoxTest(dup, Vec(-1, 0, -9), Vec(10, 12, 21)),
+  float roomDist = max(// Room
+                        -BoxTest(dup, Vec(-1, 0, -9), Vec(10, 12, 21)),
                         // Window
-                        BoxTest(dup, Vec(9, 3, -6), Vec(13, 10, 0)));
+                        -BoxTest(dup, Vec(9, 3, -6), Vec(13, 10, 0)));
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   // Window
@@ -147,21 +148,21 @@ float QueryDatabase(Vec position, int &hitType) {
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
   roomDist = min(
-      -min(
-        -BoxTest(position, Vec(4.1, 1.3, -7.2), Vec(4.3, 1.5, -7.17)),
-        -SphereTest(position, Vec(4.2, 1.4, -7.2), 0.05)
+      max(
+        BoxTest(position, Vec(4.1, 1.3, -7.2), Vec(4.3, 1.5, -7.17)),
+        SphereTest(position, Vec(4.2, 1.4, -7.2), 0.05)
         ),
-      -min(
-        -BoxTest(position, Vec(4.7, 1.3, -7.2), Vec(4.9, 1.5, -7.17)),
-        -SphereTest(position, Vec(4.8, 1.4, -7.2), 0.05)
+      max(
+        BoxTest(position, Vec(4.7, 1.3, -7.2), Vec(4.9, 1.5, -7.17)),
+        SphereTest(position, Vec(4.8, 1.4, -7.2), 0.05)
         )
       );
   if (roomDist < distance) distance = roomDist, hitType = HIT_KNOB;
 
   roomDist = min(min(
-      -min(
-      -BoxTest(position, Vec(7.5, 6.5, -8.5), Vec(9.5, 6.8, -6.5)),
-      -SphereTest(position, Vec(8.5, 8, -7.5), 1.5)
+      max(
+      BoxTest(position, Vec(7.5, 6.5, -8.5), Vec(9.5, 6.8, -6.5)),
+      SphereTest(position, Vec(8.5, 8, -7.5), 1.5)
       ),
       CilinderTest(position, Vec(8.5, 0, -7.5), 6.5, 0.03)
       ),
@@ -175,12 +176,12 @@ float QueryDatabase(Vec position, int &hitType) {
       );
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = -min(
-    -min(
+  roomDist = max(
+    min(
       BoxTest(position, Vec(2.5, 0.2, 3), Vec(9.7, 2.7, 7)),
       BoxTest(position, Vec(3.5, 1, 2.7), Vec(8.7, 3, 7))
       ),
-    BoxTest(position, Vec(2.9, 2, 2), Vec(8.8, 4, 6))
+    -BoxTest(position, Vec(2.9, 2, 2), Vec(8.8, 4, 6))
     );
   if (roomDist < distance) distance = roomDist, hitType = HIT_COUCH;
 
@@ -259,8 +260,8 @@ Vec Trace(Vec origin, Vec direction) {
 void t(Vec* a,Vec b,Vec c){*a=*a+Trace(b,c);}
 
 int main() {
-  int w = 960, h = 540, samplesCount = 128;
-//  int w = 480, h = 270, samplesCount = 16;
+//  int w = 960, h = 540, samplesCount = 128;
+  int w = 480, h = 270, samplesCount = 4;
   Vec pos(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + pos * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
