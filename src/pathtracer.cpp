@@ -214,18 +214,19 @@ Vec Trace(Vec origin, Vec direction) {
 
   for (int bounceCount = 3; bounceCount--;) {
     int hitType = RayMarching(origin, direction, sampledPosition, normal);
+    if (hitType == HIT_SUN) {
+      color = color + attenuation * Vec(50, 80, 100); break;
+    }
     float incidence = normal % lightDirection;
-    if (hitType >= HIT_TV) { // TV or knob
+    if (hitType >= HIT_LAMP) { // Lamp, TV or knob
       direction = direction + normal * ( normal % direction * -2);
       origin = sampledPosition + direction * 0.1;
-      if (hitType == HIT_TV) {
-        attenuation = attenuation * 0.05; // Attenuation via distance traveled.
-      } else {
-        attenuation = attenuation * 0.6; // Attenuation via distance traveled.
+      attenuation = attenuation * (
+          hitType == HIT_KNOB ? 0.6 : 0.05);
+      if (hitType != HIT_TV)
         direction = !(direction + Vec(r(),r(),r())*0.2);
-      }
     }
-    if (hitType >= HIT_WALL && hitType <= HIT_LAMP) {
+    if (hitType >= HIT_WALL && hitType <= HIT_COUCH) {
       float p = 6.283185 * r();
       float c = r();
       float s = sqrtf(1 - c);
@@ -240,19 +241,16 @@ Vec Trace(Vec origin, Vec direction) {
                       g * v,
                       -g * normal.x) * (sinf(p) * s) + normal * sqrtf(c);
       origin = sampledPosition + direction * .1;
-      attenuation = attenuation * (hitType == HIT_LAMP?0.01:0.2);
-      if (incidence > 0 &&
+      attenuation = attenuation * 0.2;
+    }
+    if (hitType != HIT_TV && incidence > 0 &&
           RayMarching(sampledPosition + normal * .1,
                       lightDirection,
                       sampledPosition,
                       normal) == HIT_SUN)
-          color = color + attenuation * (
-              hitType == HIT_COUCH?Vec(200, 600, 400):Vec(500, 400, 100)
-              ) * incidence;
-    }
-    if (hitType == HIT_SUN) {
-      color = color + attenuation * Vec(50, 80, 100); break;
-    }
+      color = color + attenuation * (
+          hitType == HIT_COUCH?Vec(200, 600, 400):Vec(500, 400, 100)
+          ) * incidence;
   }
   return color;
 }
@@ -260,7 +258,7 @@ Vec Trace(Vec origin, Vec direction) {
 void t(Vec* a,Vec b,Vec c){*a=*a+Trace(b,c);}
 
 int main() {
-  int w = 960, h = 540, samplesCount = 128;
+  int w = 960, h = 540, samplesCount = 256;
 //  int w = 480, h = 270, samplesCount = 4;
   Vec pos(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + pos * -1);
