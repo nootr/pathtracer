@@ -222,7 +222,8 @@ Vec Trace(Vec origin, Vec direction) {
       direction = direction + normal * ( normal % direction * -2);
       origin = sampledPosition + direction * 0.1;
       attenuation = attenuation * (
-          hitType == HIT_KNOB ? 0.6 : 0.05);
+          hitType == HIT_KNOB ? 0.6 : (
+            hitType == HIT_LAMP?0.01 : 0.05));
       if (hitType != HIT_TV)
         direction = !(direction + Vec(r(),r(),r())*0.2);
     }
@@ -249,8 +250,9 @@ Vec Trace(Vec origin, Vec direction) {
                       sampledPosition,
                       normal) == HIT_SUN)
       color = color + attenuation * (
-          hitType == HIT_COUCH?Vec(200, 600, 400):Vec(500, 400, 100)
-          ) * incidence;
+          hitType == HIT_COUCH ? Vec(200, 600, 400) : (
+            hitType == HIT_LAMP ? Vec(100) : Vec(500, 400, 100)
+          )) * incidence;
   }
   return color;
 }
@@ -258,8 +260,8 @@ Vec Trace(Vec origin, Vec direction) {
 void t(Vec* a,Vec b,Vec c){*a=*a+Trace(b,c);}
 
 int main() {
-  int w = 960, h = 540, samplesCount = 256;
-//  int w = 480, h = 270, samplesCount = 4;
+//  int w = 960, h = 540, samplesCount = 256;
+  int w = 480, h = 270, samplesCount = 64;
   Vec pos(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + pos * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
