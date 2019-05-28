@@ -161,12 +161,12 @@ float QueryDatabase(Vec position, int &hitType) {
 
   roomDist = min(min(
       max(
-      BoxTest(position, Vec(7.7, 6.5, -8.5), Vec(9.7, 6.8, -6.5)),
-      SphereTest(position, Vec(8.7, 8, -7.5), 1.5)
+      BoxTest(position, Vec(7.8, 6.5, -8.5), Vec(9.8, 6.8, -6.5)),
+      SphereTest(position, Vec(8.8, 8, -7.5), 1.5)
       ),
-      CilinderTest(position, Vec(8.7, 0, -7.5), 6.5, 0.03)
+      CilinderTest(position, Vec(8.8, 0, -7.5), 6.5, 0.03)
       ),
-      CilinderTest(position, Vec(8.7, 0, -7.5), 0.1, 0.6)
+      CilinderTest(position, Vec(8.8, 0, -7.5), 0.1, 0.6)
       );
   if (roomDist < distance) distance = roomDist, hitType = HIT_LAMP;
 
@@ -181,7 +181,7 @@ float QueryDatabase(Vec position, int &hitType) {
       BoxTest(position, Vec(2.5, 0.2, 3), Vec(9.7, 2.7, 7)),
       BoxTest(position, Vec(3.5, 1, 2.7), Vec(8.7, 3, 7))
       ),
-    -BoxTest(position, Vec(2.9, 2, 2), Vec(8.8, 4, 6))
+    -BoxTest(position, Vec(3.4, 2, 2), Vec(8.8, 4, 6))
     );
   if (roomDist < distance) distance = roomDist, hitType = HIT_COUCH;
 
@@ -260,8 +260,8 @@ Vec Trace(Vec origin, Vec direction) {
 void t(Vec* a,Vec b,Vec c){*a=*a+Trace(b,c);}
 
 int main() {
-//  int w = 960, h = 540, samplesCount = 256;
-  int w = 480, h = 270, samplesCount = 64;
+  int w = 960, h = 540, samplesCount = 256;
+//  int w = 480, h = 270, samplesCount = 64;
   Vec pos(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + pos * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
