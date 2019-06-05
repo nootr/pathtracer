@@ -185,6 +185,12 @@ float QueryDatabase(Vec position, int &hitType) {
     );
   if (roomDist < distance) distance = roomDist, hitType = HIT_COUCH;
 
+  roomDist = max(
+    CilinderTest(position, Vec(5.5, 1.5, 1), 0.14, 1.5),
+    -CilinderTest(position, Vec(5.5, 1.52, 1), 0.2, 1.49)
+  );
+  if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
+
   float sun = 11 - position.x;
   if (sun < distance) distance = sun, hitType = HIT_SUN;
 
@@ -261,7 +267,7 @@ void t(Vec* a,Vec b,Vec c){*a=*a+Trace(b,c);}
 
 int main() {
   int w = 960, h = 540, samplesCount = 256;
-//  int w = 480, h = 270, samplesCount = 64;
+//  int w = 480, h = 270, samplesCount = 8;
   Vec pos(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + pos * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
