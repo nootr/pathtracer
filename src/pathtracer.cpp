@@ -203,8 +203,8 @@ int RayMarching(Vec origin, Vec direction, Vec &hitPos, Vec &hitNorm) {
   float d; // distance from closest object in world.
 
   // Signed distance marching
-  for (float total_d=0; total_d < 100; total_d += d)
-    if ((d = QueryDatabase(hitPos = origin + direction * total_d, hitType)) < .01
+  for (float total_d=0; total_d < 99; total_d += d)
+    if ((d = QueryDatabase(hitPos = origin + direction * total_d, hitType)) < 1e-4
             || ++noHitCount > 99)
       return hitNorm =
          !Vec(QueryDatabase(hitPos + Vec(.01, 0), noHitCount) - d,
@@ -266,8 +266,8 @@ Vec Trace(Vec origin, Vec direction) {
 void t(Vec* a,Vec b,Vec c){*a=*a+Trace(b,c);}
 
 int main() {
-  int w = 960, h = 540, samplesCount = 256;
-//  int w = 480, h = 270, samplesCount = 8;
+//  int w = 960, h = 540, samplesCount = 256;
+  int w = 480, h = 270, samplesCount = 8;
   Vec pos(1, 5, 9);
   Vec goal = !(Vec(8, 4, -8) + pos * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
