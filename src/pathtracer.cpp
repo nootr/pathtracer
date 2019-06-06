@@ -1,14 +1,12 @@
 #include <stdlib.h> /*                 P A T H T R A C I N G                  */
 #include <stdio.h>  /*                    My living room                      */
-#include <math.h>   /*                                                        */
-#include <thread>   /* $ gcc -o pt ./pt.cpp                                   */
+#include <math.h>   /* $ gcc -o pt ./pt.cpp                                   */
 #define R return    /* $ chmod +x pt                       Joris Hartog, 2019 */
 #define O operator  /* $ ./pt > room.ppm                            curlba.sh */
-typedef float F;typedef int I;typedef std::thread T;struct V{F x,y,z;V(F v=0){x=
-y=z=v;}V(F a,F b,F c=0){x=a;y=b;z=c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r)
-{R V(x*r.x,y*r.y,z*r.z);}F O%(V r){R x*r.x+y*r.y+z*r.z;}V O!(){R*this*(1/sqrtf(*
-this%*this));}};F r(){R(F)rand()/RAND_MAX;}F A(F l,F r){R l<r?l:r;}F Z(F l,F r){
-R l>r?l:r;}
+typedef float F;typedef int I;struct V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c=0
+){x=a;y=b;z=c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r){R V(x*r.x,y*r.y,z*r.z
+);}F O%(V r){R x*r.x+y*r.y+z*r.z;}V O!(){R*this*(1/sqrtf(*this%*this));}};F r(){
+R(F)rand()/RAND_MAX;}F A(F l,F r){R l<r?l:r;}F Z(F l,F r){R l>r?l:r;}
 
 float SphereTest(V position, V center, float radius) {
   V delta = position + center * -1;
@@ -237,11 +235,9 @@ V Trace(V origin, V direction) {
   return color;
 }
 
-void t(V* a,V b,V c){*a=*a+Trace(b,c);}
-
 I main() {
-  I w = 960, h = 540, samplesCount = 256;
-//  I w = 480, h = 270, samplesCount = 8;
+//  I w = 960, h = 540, samplesCount = 256;
+  I w = 480, h = 270, samplesCount = 4;
   V pos(1, 5, 9);
   V goal = !(V(8, 4, -8) + pos * -1);
   V left = !V(goal.z, 0, -goal.x) * (1. / w);
@@ -251,17 +247,12 @@ I main() {
       goal.z * left.x - goal.x * left.z,
       goal.x * left.y - goal.y * left.x);
 
-  // Create array of threads
-  T** threads = (T**)malloc(sizeof(T*)*samplesCount);
-
   printf("P6 %d %d 255 ", w, h);
   for (I y = h; y--;)
     for (I x = w; x--;) {
       V col;
       for (I p = samplesCount; p--;)
-        threads[p] = new T(t,&col,pos,!(goal+left*(x-w/2+r())+up*(y-h/2+r())));
-      for (I p = samplesCount; p--;)
-        threads[p]->join();
+        col = col + Trace(pos, !(goal+left*(x-w/2+r())+up*(y-h/2+r())));
 
       // Reinhard tone mapping
       col = col * (1. / samplesCount) + 14. / 241;
