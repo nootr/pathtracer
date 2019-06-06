@@ -236,7 +236,7 @@ V Trace(V origin, V direction) {
 }
 
 I main() {
-  I w = 3840, h = 2160, samplesCount = 512;
+  I w = 1280, h = 720, samplesCount = 512;
 //  I w = 480, h = 270, samplesCount = 4;
   V pos(1, 5, 9);
   V goal = !(V(8, 4, -8) + pos * -1);
