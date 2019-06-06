@@ -240,8 +240,8 @@ V Trace(V origin, V direction) {
 void t(V* a,V b,V c){*a=*a+Trace(b,c);}
 
 int main() {
-//  int w = 960, h = 540, samplesCount = 128;
-  int w = 480, h = 270, samplesCount = 8;
+  int w = 960, h = 540, samplesCount = 256;
+//  int w = 480, h = 270, samplesCount = 8;
   V pos(1, 5, 9);
   V goal = !(V(8, 4, -8) + pos * -1);
   V left = !V(goal.z, 0, -goal.x) * (1. / w);
