@@ -1,19 +1,14 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
-#include <thread>
-
-#define R return
-#define O operator
+#include <stdlib.h> /*                 P A T H T R A C I N G                  */
+#include <stdio.h>  /*                    My living room                      */
+#include <math.h>   /*                                                        */
+#include <thread>   /* $ gcc -o pt ./pt.cpp                                   */
+#define R return    /* $ chmod +x pt                       Joris Hartog, 2019 */
+#define O operator  /* $ ./pt > room.ppm                            curlba.sh */
 typedef float F;typedef int I;typedef std::thread T;struct V{F x,y,z;V(F v=0){x=
 y=z=v;}V(F a,F b,F c=0){x=a;y=b;z=c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r)
-{R V(x*r.x,y*r.y,z*r.z);}F O%(V r){R x*r.x+y*r.y+z*r.z;}V O!() {R*this*(1/sqrtf(
-*this%*this));}};
-
-float min(float l, float r) { return l < r ? l : r; }
-float max(float l, float r) { return l > r ? l : r; }
-
-float r() { return (float) rand() / RAND_MAX; }
+{R V(x*r.x,y*r.y,z*r.z);}F O%(V r){R x*r.x+y*r.y+z*r.z;}V O!(){R*this*(1/sqrtf(*
+this%*this));}};F r(){R(F)rand()/RAND_MAX;}F A(F l,F r){R l<r?l:r;}F Z(F l,F r){
+R l>r?l:r;}
 
 float SphereTest(V position, V center, float radius) {
   V delta = position + center * -1;
@@ -23,11 +18,11 @@ float SphereTest(V position, V center, float radius) {
 float BoxTest(V position, V lowerLeft, V upperRight) {
   lowerLeft = position + lowerLeft * -1;
   upperRight = upperRight + position * -1;
-  return -min(
-          min(
-                  min(lowerLeft.x, upperRight.x),
-                  min(lowerLeft.y, upperRight.y)),
-          min(lowerLeft.z, upperRight.z));
+  return -A(
+          A(
+                  A(lowerLeft.x, upperRight.x),
+                  A(lowerLeft.y, upperRight.y)),
+          A(lowerLeft.z, upperRight.z));
 }
 
 float CilinderTest(V position, V bottom, float height, float width) {
@@ -37,9 +32,9 @@ float CilinderTest(V position, V bottom, float height, float width) {
   V down = position + bottom * -1;
   V up = bottom + V(0, height, 0) + position * -1;
 
-  return -min(
+  return -A(
       width - sqrtf(delta % delta),
-      min(down.y, up.y)
+      A(down.y, up.y)
       );
 }
 
@@ -58,7 +53,7 @@ float QueryDatabase(V position, int &hitType) {
   float distance = BoxTest(position, V(2.2, 2.6, -8.8), V(6.8, 5, -8.6));
   hitType = HIT_TV;
 
-  float roomDist = max(// Room
+  float roomDist = Z(// Room
                         -BoxTest(dup, V(-1, 0, -9), V(10, 12, 21)),
                         // Window
                         -BoxTest(dup, V(9, 3, -6), V(13, 10, 0)));
@@ -126,20 +121,20 @@ float QueryDatabase(V position, int &hitType) {
   }
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = min(
-      max(
+  roomDist = A(
+      Z(
         BoxTest(position, V(4.1, 1.3, -7.2), V(4.3, 1.5, -7.17)),
         SphereTest(position, V(4.2, 1.4, -7.2), 0.05)
         ),
-      max(
+      Z(
         BoxTest(position, V(4.7, 1.3, -7.2), V(4.9, 1.5, -7.17)),
         SphereTest(position, V(4.8, 1.4, -7.2), 0.05)
         )
       );
   if (roomDist < distance) distance = roomDist, hitType = HIT_KNOB;
 
-  roomDist = min(min(
-      max(
+  roomDist = A(A(
+      Z(
       BoxTest(position, V(7.8, 6.5, -8.5), V(9.8, 6.8, -6.5)),
       SphereTest(position, V(8.8, 8, -7.5), 1.5)
       ),
@@ -149,14 +144,14 @@ float QueryDatabase(V position, int &hitType) {
       );
   if (roomDist < distance) distance = roomDist, hitType = HIT_LAMP;
 
-  roomDist = min(
+  roomDist = A(
       BoxTest(position, V(2.14, 0.64, -8.8), V(4.41, 2.26, -7.2)),
       BoxTest(position, V(4.59, 0.64, -8.8), V(6.86, 2.26, -7.2))
       );
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
-  roomDist = max(
-    min(
+  roomDist = Z(
+    A(
       BoxTest(position, V(2.5, 0.2, 3), V(9.7, 2.7, 7)),
       BoxTest(position, V(3.5, 1, 2.7), V(8.7, 3, 7))
       ),
@@ -164,7 +159,7 @@ float QueryDatabase(V position, int &hitType) {
     );
   if (roomDist < distance) distance = roomDist, hitType = HIT_COUCH;
 
-  roomDist = max(
+  roomDist = Z(
     CilinderTest(position, V(6.5, 1.5, 1.5), 0.14, 1.5),
     -CilinderTest(position, V(6.5, 1.52, 1.5), 0.2, 1.49)
   );
