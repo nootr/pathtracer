@@ -1,6 +1,6 @@
 #include <stdlib.h> /*                 P A T H T R A C I N G                  */
 #include <stdio.h>  /*                    My living room                      */
-#include <math.h>   /* $ gcc -o pt ./pt.cpp                                   */
+#include <math.h>   /* $ gcc -lm -o pt ./pt.cpp                               */
 #define R return    /* $ chmod +x pt                       Joris Hartog, 2019 */
 #define O operator  /* $ ./pt > room.ppm                            curlba.sh */
 typedef float F;typedef int I;struct V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c=0
@@ -158,8 +158,8 @@ float QueryDatabase(V position, I &hitType) {
   if (roomDist < distance) distance = roomDist, hitType = HIT_COUCH;
 
   roomDist = Z(
-    CilinderTest(position, V(6.5, 1.5, 1.5), 0.14, 1.5),
-    -CilinderTest(position, V(6.5, 1.52, 1.5), 0.2, 1.49)
+    CilinderTest(position, V(6.5, 1.5, .7), 0.14, 1.5),
+    -CilinderTest(position, V(6.5, 1.52, .7), 0.2, 1.49)
   );
   if (roomDist < distance) distance = roomDist, hitType = HIT_WALL;
 
@@ -236,8 +236,8 @@ V Trace(V origin, V direction) {
 }
 
 I main() {
-//  I w = 960, h = 540, samplesCount = 256;
-  I w = 480, h = 270, samplesCount = 4;
+  I w = 3840, h = 2160, samplesCount = 512;
+//  I w = 480, h = 270, samplesCount = 4;
   V pos(1, 5, 9);
   V goal = !(V(8, 4, -8) + pos * -1);
   V left = !V(goal.z, 0, -goal.x) * (1. / w);
