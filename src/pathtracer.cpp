@@ -46,7 +46,7 @@ float CilinderTest(V position, V bottom, float height, float width) {
 #define HIT_TV 5
 #define HIT_KNOB 6
 
-float QueryDatabase(V position, int &hitType) {
+float QueryDatabase(V position, I &hitType) {
   V dup = position; // Used to duplicate window
   while (dup.z > 1 && dup.z < 16) dup.z -= 8;
 
@@ -171,9 +171,9 @@ float QueryDatabase(V position, int &hitType) {
   return distance;
 }
 
-int RayMarching(V origin, V direction, V &hitPos, V &hitNorm) {
-  int hitType = HIT_NONE;
-  int noHitCount = 0;
+I RayMarching(V origin, V direction, V &hitPos, V &hitNorm) {
+  I hitType = HIT_NONE;
+  I noHitCount = 0;
   float d; // distance from closest object in world.
 
   // Signed distance marching
@@ -192,8 +192,8 @@ V Trace(V origin, V direction) {
   V sampledPosition, normal, color, attenuation = 1;
   V lightDirection(!V(1,1,3)); // Directional light
 
-  for (int bounceCount = 3; bounceCount--;) {
-    int hitType = RayMarching(origin, direction, sampledPosition, normal);
+  for (I bounceCount = 3; bounceCount--;) {
+    I hitType = RayMarching(origin, direction, sampledPosition, normal);
     if (hitType == HIT_SUN) {
       color = color + attenuation * V(50, 80, 100); break;
     }
@@ -239,9 +239,9 @@ V Trace(V origin, V direction) {
 
 void t(V* a,V b,V c){*a=*a+Trace(b,c);}
 
-int main() {
-  int w = 960, h = 540, samplesCount = 256;
-//  int w = 480, h = 270, samplesCount = 8;
+I main() {
+  I w = 960, h = 540, samplesCount = 256;
+//  I w = 480, h = 270, samplesCount = 8;
   V pos(1, 5, 9);
   V goal = !(V(8, 4, -8) + pos * -1);
   V left = !V(goal.z, 0, -goal.x) * (1. / w);
@@ -255,18 +255,18 @@ int main() {
   T** threads = (T**)malloc(sizeof(T*)*samplesCount);
 
   printf("P6 %d %d 255 ", w, h);
-  for (int y = h; y--;)
-    for (int x = w; x--;) {
+  for (I y = h; y--;)
+    for (I x = w; x--;) {
       V col;
-      for (int p = samplesCount; p--;)
+      for (I p = samplesCount; p--;)
         threads[p] = new T(t,&col,pos,!(goal+left*(x-w/2+r())+up*(y-h/2+r())));
-      for (int p = samplesCount; p--;)
+      for (I p = samplesCount; p--;)
         threads[p]->join();
 
       // Reinhard tone mapping
       col = col * (1. / samplesCount) + 14. / 241;
       V o = col + 1;
       col = V(col.x / o.x, col.y / o.y, col.z / o.z) * 255;
-      printf("%c%c%c", (int) col.x, (int) col.y, (int) col.z);
+      printf("%c%c%c", (I) col.x, (I) col.y, (I) col.z);
     }
 }
