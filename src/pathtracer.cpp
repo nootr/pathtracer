@@ -1,7 +1,7 @@
 #include <stdlib.h> /*                 P A T H T R A C I N G                  */
 #include <stdio.h>  /*                    My living room                      */
-#include <math.h>   /* $ gcc -lm -o pt ./pt.cpp                               */
-#define R return    /* $ chmod +x pt                       Joris Hartog, 2019 */
+#include <math.h>   /*                                                        */
+#define R return    /* $ gcc -lm -o pt pt.cpp              Joris Hartog, 2019 */
 #define O operator  /* $ ./pt > room.ppm                            curlba.sh */
 typedef float F;typedef int I;struct V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c=0
 ){x=a;y=b;z=c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r){R V(x*r.x,y*r.y,z*r.z
