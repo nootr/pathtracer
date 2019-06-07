@@ -8,6 +8,7 @@ typedef float F;typedef int I;struct V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c=0
 );}F O%(V r){R x*r.x+y*r.y+z*r.z;}V O!(){R*this*(1/sqrtf(*this%*this));}};F r(){
 R(F)rand()/RAND_MAX;}F A(F l,F r){R l<r?l:r;}F Z(F l,F r){R l>r?l:r;}
 
+
 float SphereTest(V position, V center, float radius) {
   V delta = position + center * -1;
   return sqrtf(delta % delta) - radius;
@@ -44,7 +45,7 @@ float CilinderTest(V position, V bottom, float height, float width) {
 #define HIT_TV 5
 #define HIT_KNOB 6
 
-float QueryDatabase(V position, I &hitType) {
+float Q(V position, I &hitType) {
   V dup = position; // Used to duplicate window
   while (dup.z > 1 && dup.z < 16) dup.z -= 8;
 
@@ -169,29 +170,15 @@ float QueryDatabase(V position, I &hitType) {
   return distance;
 }
 
-I RayMarching(V origin, V direction, V &hitPos, V &hitNorm) {
-  I hitType = HIT_NONE;
-  I noHitCount = 0;
-  float d; // distance from closest object in world.
-
-  // Signed distance marching
-  for (float total_d=0; total_d < 99; total_d += d)
-    if ((d = QueryDatabase(hitPos = origin + direction * total_d, hitType)) < 0.01
-            || ++noHitCount > 99)
-      return hitNorm =
-         !V(QueryDatabase(hitPos + V(.01, 0), noHitCount) - d,
-              QueryDatabase(hitPos + V(0, .01), noHitCount) - d,
-              QueryDatabase(hitPos + V(0, 0, .01), noHitCount) - d)
-         , hitType; // Weird return statement where a variable is also updated.
-  return 0;
-}
+I M(V o,V v,V&p,V&n){I t=0,c=0;F d;for(F a=0;a<99;a+=d)if((d=Q(p=o+v*a,t))<0.01
+||++c>99)R n=!V(Q(p+V(.01,0),c)-d,Q(p+V(0,.01),c)-d,Q(p+V(0,0,.01),c)-d),t;R 0;}
 
 V Trace(V origin, V direction) {
   V sampledPosition, normal, color, attenuation = 1;
   V lightDirection(!V(1,1,3)); // Directional light
 
   for (I bounceCount = 3; bounceCount--;) {
-    I hitType = RayMarching(origin, direction, sampledPosition, normal);
+    I hitType = M(origin, direction, sampledPosition, normal);
     if (hitType == HIT_SUN) {
       color = color + attenuation * V(50, 80, 100); break;
     }
@@ -223,7 +210,7 @@ V Trace(V origin, V direction) {
       attenuation = attenuation * 0.2;
     }
     if (hitType != HIT_TV && incidence > 0 &&
-          RayMarching(sampledPosition + normal * .1,
+          M(sampledPosition + normal * .1,
                       lightDirection,
                       sampledPosition,
                       normal) == HIT_SUN)
@@ -236,8 +223,8 @@ V Trace(V origin, V direction) {
 }
 
 I main() {
-  I w = 1280, h = 720, samplesCount = 512;
-//  I w = 480, h = 270, samplesCount = 4;
+//  I w = 1280, h = 720, samplesCount = 512;
+  I w = 480, h = 270, samplesCount = 1;
   V pos(1, 5, 9);
   V goal = !(V(8, 4, -8) + pos * -1);
   V left = !V(goal.z, 0, -goal.x) * (1. / w);
