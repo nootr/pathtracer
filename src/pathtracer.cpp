@@ -1,8 +1,8 @@
-#include <stdlib.h> /*                 P A T H T R A C I N G                  */
-#include <stdio.h>  /*                    My living room                      */
-#include <math.h>   /*                                                        */
-#include <thread>   /*                                                        */
-#define R return    /* $ gcc -lm -o pt pt.cpp              Joris Hartog, 2019 */
+#include <stdlib.h> /*                                                        */
+#include <stdio.h>  /*                 P A T H T R A C I N G                  */
+#include <math.h>   /*                    My living room                      */
+#include <thread>   /*                                           Joris Hartog */
+#define R return    /* $ g++ -lm -std=c++11 -o pt pt.cpp                 2019 */
 #define O operator  /* $ ./pt > room.ppm                            curlba.sh */
 typedef std::thread X;
 typedef float F;typedef int I;struct V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c=0
