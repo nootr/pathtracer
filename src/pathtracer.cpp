@@ -4,11 +4,11 @@
 #include <thread>   /*                                           Joris Hartog */
 #define R return    /* $ g++ -lm -std=c++11 -o pt pt.cpp                 2019 */
 #define O operator  /* $ ./pt > room.ppm                            curlba.sh */
-typedef std::thread X;
-typedef float F;typedef int I;struct V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c=0
-){x=a;y=b;z=c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r){R V(x*r.x,y*r.y,z*r.z
-);}F O%(V r){R x*r.x+y*r.y+z*r.z;}V O!(){R*this*(1/sqrtf(*this%*this));}};F r(){
-R(F)rand()/RAND_MAX;}F A(F l,F r){R l<r?l:r;}F Z(F l,F r){R l>r?l:r;}
+typedef std::thread X;typedef float F;typedef int I;struct V{F x,y,z;V(F v=0){x=
+y=z=v;}V(F a,F b,F c=0){x=a;y=b;z=c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r)
+{R V(x*r.x,y*r.y,z*r.z);}F O%(V r){R x*r.x+y*r.y+z*r.z;}V O!(){R*this*(1/sqrtf(*
+this%*this));}};F r(){R(F)rand()/RAND_MAX;}F A(F l,F r){R l<r?l:r;}F Z(F l,F r){
+R l>r?l:r;}
 
 
 float SphereTest(V position, V center, float radius) {
@@ -166,69 +166,16 @@ float Q(V position, I &hitType) {
 
 I M(V o,V v,V&p,V&n){I t,c=0;F d;for(F a=0;a<99;a+=d)if((d=Q(p=o+v*a,t))<0.01||
 ++c>99)R n=!V(Q(p+V(.01,0),c)-d,Q(p+V(0,.01),c)-d,Q(p+V(0,0,.01),c)-d),t;R 0;}
-
-V T(V o,V d) {V q,n,e,a=1,w(!V(1,1,3));for(I x=3;x--;){I t=M(o,d,q,n);if(t==1){e
-=e+a*V(51,81,99);break;}F i=n%w;if(t>=4){d=d+n*(n%d*-2);o=q+d*0.1;a=a*(t==6?0.6:
-(t==4?0.01:0.05));if(t!=5)d=!(d+V(r(),r(),r())*0.2);}
-    if (t >= 2 && t <= 3) {
-      F p = 6.283185 * r();
-      F c = r();
-      F s = sqrtf(1 - c);
-      F g = n.z < 0 ? -1 : 1;
-      F u = -1 / (g + n.z);
-      F v = n.x * n.y * u;
-      d = V(v,
-                      g + n.y * n.y * u,
-                      -n.y) * (cosf(p) * s)
-                  +
-                  V(1 + g * n.x * n.x * u,
-                      g * v,
-                      -g * n.x) * (sinf(p) * s) + n * sqrtf(c);
-      o = q + d * .1;
-      a = a * 0.2;
-    }
-    if (t != 5 && i > 0 &&
-          M(q + n * .1,
-                      w,
-                      q,
-                      n) == 1)
-      e = e + a * (
-          t == 3 ? V(200, 600, 400) : (
-            t == 4 ? V(100) : V(500, 400, 100)
-          )) * i;
-  }
-  R e;
-}
-
-void t(V* a,V b,V c){*a=*a+T(b,c);}
-
-I main() {
-//  I w = 1280, h = 720, samplesCount = 512;
-  I w = 480, h = 270, samplesCount = 1;
-  V pos(1, 5, 9);
-  V goal = !(V(8, 4, -8) + pos * -1);
-  V left = !V(goal.z, 0, -goal.x) * (1. / w);
-
-  // Cross-product to get the up vector
-  V up(goal.y * left.z - goal.z * left.y,
-      goal.z * left.x - goal.x * left.z,
-      goal.x * left.y - goal.y * left.x);
-
-  X** threads = (X**)malloc(sizeof(X*)*samplesCount);
-
-  printf("P6 %d %d 255 ", w, h);
-  for (I y = h; y--;)
-    for (I x = w; x--;) {
-      V col;
-      for (I p = samplesCount; p--;)
-        threads[p] = new X(t,&col,pos,!(goal+left*(x-w/2+r())+up*(y-h/2+r())));
-      for (I p = samplesCount; p--;)
-        threads[p]->join();
-
-      // Reinhard tone mapping
-      col = col * (1. / samplesCount) + 14. / 241;
-      V o = col + 1;
-      col = V(col.x / o.x, col.y / o.y, col.z / o.z) * 255;
-      printf("%c%c%c", (I) col.x, (I) col.y, (I) col.z);
-    }
-}
+V T(V o,V d){V q,n,e,a=1,w(!V(1,1,3));for(I x=3;x--;){I t=M(o,d,q,n);if(t==1){e
+=e+a*V(51,81,99);break;}F i=n%w;if(t>3){d=d+n*(n%d*-2);o=q+d*0.1;a=a*(t==6?0.6:
+(t==4?0.01:0.05));if(t!=5)d=!(d+V(r(),r(),r())*0.2);}if(t>1&&t<4){F p=6.28*r(),
+c=r(),s=sqrtf(1-c),g=n.z<0?-1:1,u=-1/(g+n.z),v=n.x*n.y*u;d=V(v,g+n.y*n.y*u,-n.y
+)*(cosf(p)*s)+V(1+g*n.x*n.x*u,g*v,-g*n.x)*(sinf(p)*s)+n*sqrtf(c);o=q+d*.1;a=a*0.2
+;}if(t!=5&&i>0&&M(q+n*.1,w,q,n)==1)e=e+a*(t==3?V(200,600,400):(t==4?V(100):V(500,
+400,100)))*i;}R e;}void t(V* a,V b,V c){*a=*a+T(b,c);}
+I main(){I w=480,h=270,s=1;V o(1,5,9),g=!(V(8,4,-8)+o*-1),l=!V(g.z,0,-g.x)*(1./w
+),u(g.y*l.z-g.z*l.y,g.z*l.x-g.x*l.z,g.x*l.y-g.y*l.x);X**e=(X**)malloc(sizeof(X*)
+*s);printf("P6 %d %d 255 ",w,h);for(I y=h;y--;)for(I x=w;x--;){V c;for(I p=s;p--
+;)e[p]=new X(t,&c,o,!(g+l*(x-w/2+r())+u*(y-h/2+r())));for(I p=s;p--;)e[p]->join(
+);c=c*(1./s)+14./241;V o=c+1;c=V(c.x/o.x,c.y/o.y,c.z/o.z)*255;printf("%c%c%c",(I
+)c.x,(I)c.y,(I)c.z);}}
