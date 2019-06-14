@@ -74,7 +74,8 @@ float Q(V position, I &hitType) {
 
   S world = "(:`     h p2a`4 p& t h%902cj`p& l h%91cj`p&&q$-4\"0cnp4& l h4\"0"
     "cj`ri&q$-%90cnp6i l h%90cj`p&&q\"1%90cnwd& l h%90cj`qu&q$%#i0cnp5u l h#i0"
-    "cjot&&q$-%9074";
+    "cjot&&q$-%9074`&  # <!e(n1`&!4#!5!e(n0q#!4#<>!e(n0b>a4# <!e(n0`&%t# <!e(n0"
+    "`&!4# < 9(n0`&  ?!5 $(n0b>` ?!5 $(n0`&  #!5 $  0b>` # < $  07";
   F closest_distance = 1e4;
   F dis_stack[128];
   I sp = 0, currentHitType, ht_stack[128];
@@ -98,6 +99,18 @@ float Q(V position, I &hitType) {
 //    BoxTest(dup, V(10.7, 6.3, -6), V(10.8, 6.7, 0)); -> "cjot&&q$-%9" + "0"
 //  } -> "7"
 //  ToggleDuplicate() -> "4"
+//  BoxTest(position, V(2, 0, -8.8), V(7, 2.5, -7.2)); -> "`&  # <!e(n"
+//  if (stack.pop(1) < 1) { -> "1"
+//    BoxTest(V(2, 0.5, -8.8), V(2.1, 2.5, -7.2)); -> "`&!4#!5!e(n" + "0"
+//    BoxTest(V(4.45, 0.5, -8.8), V(4.55, 2.5, -7.2)); -> "q#!4#<>!e(n" + "0"
+//    BoxTest(V(6.9, 0.5, -8.8), V(7, 2.5, -7.2)); -> "b>a4# <!e(n" + "0"
+//    BoxTest(V(2, 2.3, -8.8), V(7, 2.5, -7.2)); -> "`&%t# <!e(n" + "0"
+//    BoxTest(V(2, 0.5, -8.8), V(7, 0.6, -7.2)); -> "`&!4# < 9(n" + "0"
+//    BoxTest(V(2, 0, -7.4), V(2.1, 1, -7.2)); -> "`&  ?!5 $(n" + "0"
+//    BoxTest(V(6.9, 0, -7.4), V(7, 1, -7.2)); -> "b>` ?!5 $(n" + "0"
+//    BoxTest(V(2, 0, -8.8), V(2.1, 1, -8.6)); -> "`&  #!5 $  " + "0"
+//    BoxTest(V(6.9, 0, -8.8), V(7, 1, -8.6)); -> "b>` # < $  " + "0"
+//  } -> "7";
 
 //  fprintf(stderr, "===\n");
 
@@ -146,38 +159,7 @@ float Q(V position, I &hitType) {
   float distance = BoxTest(position, V(2.2, 2.6, -8.8), V(6.8, 5, -8.6));
   if (distance < closest_distance) closest_distance = distance, hitType = 5;
 
-  // Locker
-  F roomDist = BoxTest(position, V(2, 0, -8.8), V(7, 2.5, -7.2));
-  if (roomDist < 1) {
-    roomDist = BoxTest(position, V(2, 0.5, -8.8), V(2.1, 2.5, -7.2));
-    if (roomDist < closest_distance) closest_distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(4.45, 0.5, -8.8), V(4.55, 2.5, -7.2));
-    if (roomDist < closest_distance) closest_distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(6.9, 0.5, -8.8), V(7, 2.5, -7.2));
-    if (roomDist < closest_distance) closest_distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(2, 2.3, -8.8), V(7, 2.5, -7.2));
-    if (roomDist < closest_distance) closest_distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(2, 0.5, -8.8), V(7, 0.6, -7.2));
-    if (roomDist < closest_distance) closest_distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(2, 0, -7.4), V(2.1, 1, -7.2));
-    if (roomDist < closest_distance) closest_distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(6.9, 0, -7.4), V(7, 1, -7.2));
-    if (roomDist < closest_distance) closest_distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(2, 0, -8.8), V(2.1, 1, -8.6));
-    if (roomDist < closest_distance) closest_distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(6.9, 0, -8.8), V(7, 1, -8.6));
-  }
-  if (roomDist < closest_distance) closest_distance = roomDist, hitType = 2;
-
-  roomDist = A(
+  F roomDist = A(
       Z(
         BoxTest(position, V(4.1, 1.3, -7.2), V(4.3, 1.5, -7.17)),
         SphereTest(position, V(4.2, 1.4, -7.2), 0.05)

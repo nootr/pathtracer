@@ -59,10 +59,10 @@ elif c == 'B':
     c = float(input('Third number? '))
     c += 9
     exponent = 0
-    while int(c) != c:
+    while int(c) != c and exponent < 1:
         exponent += 1
         c *= 10
-    bitstream += numToBinary(c, 7)
+    bitstream += numToBinary(int(c), 7)
     bitstream += numToBinary(exponent, 1)
 
     a = float(input('Fourth number? '))
