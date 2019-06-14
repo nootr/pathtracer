@@ -40,11 +40,11 @@ if c == 'S':
 elif c == 'B':
     bitstream += '1'
     a = float(input('First number? '))
+    a += 1
     exponent = 0
     while int(a) != a:
         exponent += 1
         a *= 10
-    a += 1
     bitstream += numToBinary(a, 10)
     bitstream += numToBinary(exponent, 2)
 
@@ -57,11 +57,11 @@ elif c == 'B':
     bitstream += numToBinary(exponent, 2)
 
     c = float(input('Third number? '))
+    c += 9
     exponent = 0
     while int(c) != c:
         exponent += 1
         c *= 10
-    c += 9
     bitstream += numToBinary(c, 7)
     bitstream += numToBinary(exponent, 1)
 
@@ -82,12 +82,12 @@ elif c == 'B':
     bitstream += numToBinary(exponent, 2)
 
     a = float(input('Last number? '))
+    a += 8.6
     exponent = 0
-    while int(a) != a:
+    while int(a) != a and exponent < 2:
         exponent += 1
         a *= 10
-    a += 86
-    bitstream += numToBinary(a, 8)
+    bitstream += numToBinary(int(a), 10)
     bitstream += numToBinary(exponent, 2)
 
 
