@@ -67,18 +67,18 @@ elif c == 'B':
 
     a = float(input('Fourth number? '))
     exponent = 0
-    while int(a) != a:
+    while int(a) != a and exponent < 2:
         exponent += 1
         a *= 10
-    bitstream += numToBinary(a, 10)
+    bitstream += numToBinary(int(a), 10)
     bitstream += numToBinary(exponent, 2)
 
     a = float(input('Fifth number? '))
     exponent = 0
-    while int(a) != a:
+    while int(a) != a and exponent < 2:
         exponent += 1
         a *= 10
-    bitstream += numToBinary(a, 10)
+    bitstream += numToBinary(int(a), 10)
     bitstream += numToBinary(exponent, 2)
 
     a = float(input('Last number? '))
