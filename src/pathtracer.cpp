@@ -78,19 +78,19 @@ float Q(V position, I &hitType) {
     "cj`ri&q$-%90cnp6i l h%90cj`p&&q\"1%90cnwd& l h%90cj`qu&q$%#i0cnp5u l h#i0"
     "cjot&&q$-%9074`&  # <!e(n1`&!4#!5!e(n0q#!4#<>!e(n0b>a4# <!e(n0`&%t# <!e(n0"
     "`&!4# < 9(n0`&  ?!5 $(n0b>` ?!5 $(n0`&  #!5 $  0b>` # < $  07iu0(#;f.&(n0"
-    "q?0(#jz.&(n0*ch/02+`f5`020";
+    "q?0(#jz.&(n0*ch/02+`f5`020;a&`d8&%!m)qa:`3k%= ,)q02a8``6%a 0))020";
   F closest_distance = 1e4;
   F dis_stack[128];
   I sp = 0, currentHitType, ht_stack[128];
 
-// padding -> "("
-// hitType = 2 -> ":"
-// Boxtest (-1, 0, -9, 10, 12, 21) -> "`     h p2a"
-// Boxtest (9, 3, -6, 13, 10, 0) -> "`4 p& t h%9"
-// Min() -> "0"
-// Invert() -> "2"
-// BoxTest(dup, V(10.7, 3, -6), V(11, 10, 0)) -> "cj`p& l h%9"
-// if (stack.pop(1) < 1) { -> "1"
+//  padding -> "("
+//  hitType = 2 -> ":"
+//  Boxtest (-1, 0, -9, 10, 12, 21) -> "`     h p2a"
+//  Boxtest (9, 3, -6, 13, 10, 0) -> "`4 p& t h%9"
+//  Min() -> "0"
+//  Invert() -> "2"
+//  BoxTest(dup, V(10.7, 3, -6), V(11, 10, 0)) -> "cj`p& l h%9"
+//  if (stack.pop(1) < 1) { -> "1"
 //    BoxTest(dup, V(10.7, 3, -6), V(10.8, 6.7, -5.4)); -> "cj`p&&q$-4\"" + "0"
 //    BoxTest(dup, V(10.9, 6.5, -6), V(11, 10, -5.4)); -> "cnp4& l h4\"" + "0"
 //    BoxTest(dup, V(10.7, 3, -0.6), V(10.8, 6.7, 0)); -> "cj`ri&q$-%9" + "0"
@@ -122,10 +122,30 @@ float Q(V position, I &hitType) {
 //  Min(); -> "0"
 //  Invert(); -> "2"
 //  Min(); "0"
+//  hitType = 3 -> ";"
+//  BoxTest(V(2.5, 0.2, 3), V(9.7, 2.7, 7)); -> "a&`d8&%!m)q"
+//  BoxTest(V(3.5, 1, 2.7), V(8.7, 3, 7));   -> "a:`3k%= ,)q"
+//  Min(); -> "0"
+//  Invert(); -> "2"
+//  BoxTest(V(3.4, 2, 2), V(8.8, 4, 6)); -> "a8``6%a 0))"
+//  Min(); -> "0"
+//  Invert(); -> "2"
+//  Min(); -> "0"
 
 //  fprintf(stderr, "===\n");
 
   while(*++world){
+    if (*world == 48) // Min
+      if(dis_stack[sp--] < dis_stack[sp]) {
+        dis_stack[sp] = dis_stack[sp+1];
+        ht_stack[sp] = ht_stack[sp+1];
+      }
+    if (*world == 49 && dis_stack[sp--] > 1) // Skip if not less than 1
+      while(*++world != 55);
+    if (*world == 50) // Invert
+      dis_stack[sp] = -dis_stack[sp];
+    if (*world == 52) // Toggle duplicate
+      dup = position;
     if ((*world & 0b01011000) == 0b00011000) // Set Object
       currentHitType = *world & 0b111;
     if(*world&0b01000000) { // BoxTest
@@ -148,13 +168,13 @@ float Q(V position, I &hitType) {
 //      fprintf(stderr, "Current hitType: %i\n", currentHitType);
       world += 10;
     }
-    if ((*world & 0b01011000) == 0b00001000) { // CilinderTest
+    else if((*world&0b01011000) == 0b00001000) { // CilinderTest
       F bot_A = 6.5 + C(world, 4, 1) * 2.3;
       F bot_B = C(world, 5, 1) * 1.5 + C(world, 6, 1) * 0.02;
       F bot_C = -7.5 + C(world, 8, 1) * 8.2;
       F height = C(world, 10, 7) / pow(10,C(world, 19, 2));
       F width = C(world, 21, 8) / pow(10,C(world, 31, 2));
-      world += 5;
+      world += 4; // WTF?
 //      fprintf(stderr, "CilinderTest(V(%f, %f, %f), %f, %f)\n",
 //          bot_A, bot_B, bot_C, height, width);
 
@@ -166,19 +186,6 @@ float Q(V position, I &hitType) {
       dis_stack[++sp] = -A(width - sqrtf(delta%delta), A(down.y, up.y));
       ht_stack[sp] = currentHitType;
     }
-    if (*world == 48) // Min
-      if(dis_stack[sp--] < dis_stack[sp]) {
-        dis_stack[sp] = dis_stack[sp+1];
-        ht_stack[sp] = ht_stack[sp+1];
-      }
-    if (*world == 49 && dis_stack[sp--] > 1) // Skip if not less than 1
-      while(*++world != 55);
-    if (*world == 50) { // Invert
-//      fprintf(stderr, "Invert()\n");
-      dis_stack[sp] = -dis_stack[sp];
-    }
-    if (*world == 52) // Toggle duplicate
-      dup = position;
   }
   closest_distance = dis_stack[sp];
   hitType = ht_stack[sp];
@@ -209,21 +216,6 @@ float Q(V position, I &hitType) {
       );
   if (roomDist < closest_distance) closest_distance = roomDist, hitType = 4;
 
-  roomDist = Z(
-    A(
-      BoxTest(position, V(2.5, 0.2, 3), V(9.7, 2.7, 7)),
-      BoxTest(position, V(3.5, 1, 2.7), V(8.7, 3, 7))
-      ),
-    -BoxTest(position, V(3.4, 2, 2), V(8.8, 4, 6))
-    );
-  if (roomDist < closest_distance) closest_distance = roomDist, hitType = 3;
-
-//  roomDist = Z(
-//    CilinderTest(position, V(6.5, 1.5, .7), 0.14, 1.5),
-//    -CilinderTest(position, V(6.5, 1.52, .7), 0.2, 1.49)
-//  );
-//  if (roomDist < closest_distance) closest_distance = roomDist, hitType = 2;
-
   float sun = 11 - position.x;
   if (sun < closest_distance) closest_distance = sun, hitType = 1;
 
@@ -239,7 +231,7 @@ c=r(),s=sqrtf(1-c),g=n.z<0?-1:1,u=-1/(g+n.z),v=n.x*n.y*u;d=V(v,g+n.y*n.y*u,-n.y
 )*(cosf(p)*s)+V(1+g*n.x*n.x*u,g*v,-g*n.x)*(sinf(p)*s)+n*sqrtf(c);o=q+d*.1;a=a*0.2
 ;}if(t!=5&&i>0&&M(q+n*.1,w,q,n)==1)e=e+a*(t==3?V(200,600,400):(t==4?V(100):V(500,
 400,100)))*i;}return e;}void t(V* a,V b,V c){*a=*a+T(b,c);}
-I main(){I w=320,h=180,s=6;V o(1,5,9),g=!(V(8,4,-8)+o*-1),l=!V(g.z,0,-g.x)*(1./w
+I main(){I w=320,h=180,s=1;V o(1,5,9),g=!(V(8,4,-8)+o*-1),l=!V(g.z,0,-g.x)*(1./w
 ),u(g.y*l.z-g.z*l.y,g.z*l.x-g.x*l.z,g.x*l.y-g.y*l.x);X**e=(X**)malloc(sizeof(X*)
 *s);printf("P6 %d %d 255 ",w,h);for(I y=h;y--;)for(I x=w;x--;){V c;for(I p=s;p--
 ;)e[p]=new X(t,&c,o,!(g+l*(x-w/2+r())+u*(y-h/2+r())));for(I p=s;p--;)e[p]->join(
