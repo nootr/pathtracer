@@ -1,0 +1,256 @@
+#!/usr/bin/env python3
+
+## compiler.py
+# A compiler to convert renderer function calls into a compact, ASCII-printable,
+# bitstream.
+#
+# The instructionset which is used is as follows:
+# * 1       box(down_x, down_y, down_z, up_x, up_y, up_z);
+# * 000     sphere(center_x, center_y, center_z, radius);
+# * 001     cilinder(bottom_x, bottom_y, bottom_z, height, width);
+# * 01000   set_type(id);
+# * 01001   if_less_than_one { BLOCK }
+# * 01010   invert();
+# * 01011   toggle_duplicate();
+# * 011     min();
+#
+# Commands are semi-colon seperated, whitespace is ignored and all numbers are
+# floats that consist of two custom-sized integers (a base and a 10-exponent).
+#
+# ASCII characters are printable between 0b00100000 and 0b01111111, so the
+# first bit must be zero and the third bit must be 1. This means we only have
+# 6 bits of data per character, with a bitmask of 0b01011111.
+
+import logging
+import re
+import argparse
+
+class Lexer(object):
+    """Lexer
+
+    The Lexer turns the code into a list of tokens, which are pulled by the
+    Parser one-by-one.
+    """
+    def __init__(self, code):
+        logging.debug('Initializing Lexer with %d bytes of code.', len(code))
+        self.code = code
+        self._tokens = {
+                '^box': 'BOX',
+                '^sphere': 'SPHERE',
+                '^cilinder': 'CILINDER',
+                '^set_type': 'SET',
+                '^if_less_than_one': 'IF',
+                '^invert': 'INVERT',
+                '^toggle_duplicate': 'TOGGLE',
+                '^min': 'MIN',
+                '^\(': 'BRACKET_OPEN',
+                '^\)': 'BRACKET_CLOSE',
+                '^{': 'CURLY_OPEN',
+                '^}': 'CURLY_CLOSE',
+                '^-?[0-9]*.?[0-9]+': 'NUMBER',
+                '^;': 'SEMICOLON',
+                '^,': 'COMMA'
+                }
+
+    def pull(self):
+        """Returns the next token or None on EOF, raises on syntax error."""
+        self.code = self.code.strip()
+        if not self.code:
+            logging.debug('Lexer: pull -> EOF')
+            return None
+        for regex in self._tokens:
+            match = re.search(regex, self.code)
+            if match:
+                value = match.group(0)
+                token_type = self._tokens[regex]
+                logging.debug('Lexer: pull -> %s %s',
+                        token_type, value)
+                self.code = self.code[len(value):]
+                return {
+                        'type': token_type,
+                        'value': value
+                        }
+        raise SyntaxError(self.code)
+
+
+class Parser(object):
+    """Parser
+
+    Fetches the tokens one-by-one and creates an Abstract Syntax Tree.
+    """
+    def __init__(self, code):
+        logging.debug('Initializing Parser..')
+        self._lexer = Lexer(code)
+        self._AST = []
+
+    @property
+    def AST(self):
+        """Creates and returns an Abstract Syntax Tree."""
+        try:
+            if not self._AST:
+                logging.debug('Creating Abstract Syntax Tree..')
+                token = self._lexer.pull()
+                while token:
+                    if token['type'] == 'IF':
+                        curly_open = self._lexer.pull()
+                        assert curly_open['type'] == 'CURLY_OPEN'
+                        branch = [token, curly_open]
+                        number_open = 1
+                        while number_open:
+                            new_token = self._lexer.pull()
+                            assert new_token
+                            if new_token['type'] == 'CURLY_OPEN':
+                                number_open += 1
+                            elif new_token['type'] == 'CURLY_CLOSE':
+                                number_open -= 1
+                            branch.append(new_token)
+                        self._AST.append(branch)
+                    else:
+                        branch = [token]
+                        while branch[-1]['type'] != 'SEMICOLON':
+                            new_token = self._lexer.pull()
+                            assert new_token
+                            branch.append(new_token)
+                        self._AST.append(branch)
+                    token = self._lexer.pull()
+            return self._AST
+        except Exception as e:
+            logging.error('Could not create AST: %s', e)
+            raise SyntaxError()
+
+
+class Compiler(object):
+    """Compiler
+
+    Fetches an Abstract Syntax Tree, turns it into a bitstream and packs it in
+    a string of ASCII-readable characters.
+    """
+    def __init__(self, AST):
+        logging.debug('Initializing Compiler with AST: %s', AST)
+        self.AST = AST
+        self._bitstream = ''
+        self._compile_functions = {
+                'BOX': self._compile_box,
+                'SPHERE': self._compile_sphere,
+                'CILINDER': self._compile_cilinder,
+                'SET': self._compile_set,
+                'IF': self._compile_if,
+                'INVERT': self._compile_invert,
+                'TOGGLE': self._compile_toggle,
+                'MIN': self._compile_min,
+                'SEMICOLON': self._noop
+                }
+
+    @property
+    def bytecode(self):
+        """Fetches a bitstream and converts it into ASCII-readable bytes."""
+        ascii_possible = []
+        character = ''
+        count = 0
+        for c in self.bitstream:
+            if count == 0:
+                character += '0'
+                count += 1
+            elif count == 2:
+                character += '1'
+                count += 1
+            character += c
+            count += 1
+            if count == 8:
+                ascii_possible.append(character)
+                character = ''
+                count = 0
+        if character:
+            character += '0'*(8-len(character))
+            ascii_possible.append(character)
+        characters = ''
+        for char in ascii_possible:
+            characters += chr(int(char, 2))
+        return characters
+
+    @property
+    def bitstream(self):
+        """Converts an AST into a string of zeroes and ones."""
+        try:
+            if not self._bitstream:
+                if isinstance(self.AST[0], list):
+                    for branch in self.AST:
+                        compiler = Compiler(branch)
+                        self._bitstream += compiler.bitstream
+                else:
+                    token_type = self.AST[0]['type']
+                    assert token_type in self._compile_functions
+                    compile_function = self._compile_functions[token_type]
+                    self._bitstream = compile_function(self.AST)
+            return self._bitstream
+        except Exception as e:
+            logging.error('Could not compile AST!')
+            raise
+
+    def _compile_box(self, AST):
+        """Compiles a box() function."""
+        return ''
+
+    def _compile_sphere(self, AST):
+        """Compiles a sphere() function."""
+        return ''
+        ''
+
+    def _compile_cilinder(self, AST):
+        """Compiles a cilinder() function."""
+        return ''
+
+    def _compile_set(self, AST):
+        """Compiles a set_type() function."""
+        return ''
+
+    def _compile_if(self, AST):
+        """Compiles an if-statement."""
+        return ''
+
+    def _compile_invert(self, AST):
+        """Compiles an invert() function."""
+        return '01010'
+
+    def _compile_toggle(self, AST):
+        """Compiles a toggle_duplicate() function."""
+        return '01011'
+
+    def _compile_min(self, AST):
+        """Compiles a min() function."""
+        return '011'
+
+    def _noop(self):
+        """Do nothing."""
+        return ''
+
+
+def parse_args():
+    """Parses arguments, the usual way."""
+    parser = argparse.ArgumentParser(description='Compiler for my pathtracer.')
+    parser.add_argument('filename', action='store',
+            help='Source code')
+    parser.add_argument('-d', '--debug',
+            help='Enable debug', action='store_true')
+    return parser.parse_args()
+
+def read_file(filename):
+    """Opens a file and returns its contents."""
+    try:
+        with open(filename, 'r') as file:
+            return file.read()
+    except Exception as e:
+        logging.error('Could not open file: %s', e)
+
+def run(filename):
+    """Runs the program."""
+    code = read_file(filename)
+    parser = Parser(code)
+    compiler = Compiler(parser.AST)
+    print(compiler.bytecode)
+
+if __name__ == "__main__":
+    args = parse_args()
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    run(args.filename)
