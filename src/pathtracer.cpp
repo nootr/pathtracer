@@ -1,3 +1,49 @@
+// https://mattermost.hostnet.nl/hostnet/pl/pz8uhrwieifpdgtj6enafen4bc
+#include <stdlib.h> /*                                                        */
+#include <stdio.h>  /*                 P A T H T R A C I N G                  */
+#include <math.h>   /*                    My living room                      */
+#include <thread>   /*                                           Joris Hartog */
+#define R return    /* $ g++ -lm -std=c++11 -o pt pt.cpp                 2019 */
+#define O operator  /* $ ./pt > room.ppm                            curlba.sh */
+typedef char const* S;typedef std::thread X;typedef float F;F A(F l,F r){R l<r?l
+:r;}typedef int I;struct V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c=0){x=a;y=b;z=
+c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r){R V(x*r.x,y*r.y,z*r.z);}F O%(V r)
+{R x*r.x+y*r.y+z*r.z;}V O!(){R*this*(1/sqrtf(*this%*this));}};I C(S a,I p,I l){I
+r=0;while(l)if(++p%8&&p%8!=2){r=(r<<1)+(128>>((p%8))&a[p/8]?1:0);l--;}R r;}F r()
+{R(F)rand()/RAND_MAX;}F Q(V p,I &h){V d=p;while(d.z>1&&d.z<16)d.z-=8;S w="(:`  "
+"   h p2a`4 p& t h%902cj`p& l h%91cj`p&&q$-4\"0cnp4& l h4\"0cj`ri&q$-%90cnp6i l"
+" h%90cj`p&&q\"1%90cnwd& l h%90cj`qu&q$%#i0cnp5u l h#i0cjot&&q$-%9074`&  # <!e("
+"n1`&!4#!5!e(n0q#!4#<>!e(n0b>a4# <!e(n0`&%t# <!e(n0`&!4# < 9(n0`&  ?!5 $(n0b>` "
+"?!5 $(n0`&  #!5 $  0b>` # < $  07iu0(#;f.&(n0q?0(#jz.&(n0*ch/02+`f5`020;a&`d8&"
+"%!m)qa:`3k%= ,)q02a8``6%a 0))020<bpp4+&)$1-&2'!2020,04#`0, 4&00=a fd#$1 4  0>a"
+"fc4e\"m }(z2 \"202arc4e#% }(z2\"\"20200";F c=1e4,a[9];I f=0,e,b[9];while(*++w){
+if(*w==48)if(a[f--]<a[f]){a[f]=a[f+1];b[f]=b[f+1];}if(*w==49&&a[f--]>1)while(*++
+w!=55);if(*w==50)a[f]=-a[f];if(*w==52)d=p;if((*w&88)==24)e=*w&7;if(*w&64){V l=d+
+V(C(w,2,10)/pow(10,C(w,14,2))-1,C(w,18,7)/pow(10,C(w,27,2)),C(w,29,7)/pow(10,C(w
+,38,1))-9)*-1,u=V(C(w,40,10)/pow(10,C(w,53,2)),C(w,56,10)/pow(10,C(w,69,2)),C(w,
+72,10)/pow(10,C(w,85,2))-8.6)+d*-1;F d=-A(A(A(l.x,u.x),A(l.y,u.y)),A(l.z,u.z));a
+[++f]=d;b[f]=e;w+=10;}else if((*w&88)==8){V p(6.5+C(w,4,1)*2.3,C(w,5,1)*1.5+C(w,
+6,1)*0.02,-7.5+C(w,8,1)*8.2),q=d+p*-1,v=q,u=p+V(0,C(w,10,7)/pow(10,C(w,19,2)),0)
++d*-1;q.y=0;a[++f]=-A(C(w,21,8)/pow(10,C(w,31,2))-sqrtf(q%q),A(v.y,u.y));b[f]=e;
+w+=4;}else if(!(*w&88)){V q=d+V(-4.2-(*w&4)-(*w&2)*0.3,-1.4-(*w&1)*6.6,7.5-(*++w
+&2)*0.15);a[++f]=sqrtf(q%q)-0.05+(w[-1]&1)*1.45;b[f]=e;}}c=a[f];h=b[f];F g=11-p.
+x;if(g<c)c=g,h=1;R c;}I M(V o,V v,V&p,V&n){I t,c=0;F d;for(F a=0;a<99;a+=d)if((d
+=Q(p=o+v*a,t))<0.01||++c>99)R n=!V(Q(p+V(.01,0),c)-d,Q(p+V(0,.01),c)-d,Q(p+V(0,0
+,.01),c)-d),t;R 0;}V T(V o,V d){V q,n,e,a=1,w(!V(1,1,3));for(I x=3;x--;){I t=M(o
+,d,q,n);if(t==1){e=e+a*V(51,81,99);break;}F i=n%w;if(t>3){d=d+n*(n%d*-2);o=q+d*
+0.1;a=a*(t==6?0.6:(t==4?0.01:0.05));if(t!=5)d=!(d+V(r(),r(),r())*0.2);}if(t>1&&t
+<4){F p=6.28*r(),c=r(),s=sqrtf(1-c),g=n.z<0?-1:1,u=-1/(g+n.z),v=n.x*n.y*u;d=V(v,
+g+n.y*n.y*u,-n.y)*(cosf(p)*s)+V(1+g*n.x*n.x*u,g*v,-g*n.x)*(sinf(p)*s)+n*sqrtf(c)
+;o=q+d*.1;a=a*0.2;}if(t!=5&&i>0&&M(q+n*.1,w,q,n)==1)e=e+a*(t==3?V(200,600,400):(
+t==4?V(100):V(500,400,100)))*i;}R e;}void t(V* a,V b,V c){*a=*a+T(b,c);}I main()
+{I w=320,h=180,s=6;V o(1,5,9),g=!(V(8,4,-8)+o*-1),l=!V(g.z,0,-g.x)*(1./w),u(g.y*
+l.z-g.z*l.y,g.z*l.x-g.x*l.z,g.x*l.y-g.y*l.x);printf("P6 %d %d 255 ",w,h);X**e=(X
+**)malloc(sizeof(X*)*s);for(I y=h;y--;)for(I x=w;x--;){V c;for(I p=s;p--;)e[p]=
+new X(t,&c,o,!(g+l*(x-w/2+r())+u*(y-h/2+r())));for(I p=s;p--;)e[p]->join();c=c*(
+1./s)+14./241;V o=c+1;c=V(c.x/o.x,c.y/o.y,c.z/o.z)*255;printf("%c%c%c",(I)c.x,(I
+                                )c.y,(I)c.z);}}
+
+
   /* Stack based system with the following instructions:
    * - 0bX0X0 0... SphereTest: [4.2,4.8,8.8] a 2 bits (4.2 + 0b10*4 + 0b01*0.6)
    *                      [1.4,8.0] a 1 bit (1.4 + 0b1*6.6)
@@ -26,118 +72,6 @@
    * 6 bits of data per character, with a bitmask of 0b01011111.
    */
 
-// https://mattermost.hostnet.nl/hostnet/pl/pz8uhrwieifpdgtj6enafen4bc
-#include <stdlib.h> /*                 P A T H T R A C I N G                  */
-#include <stdio.h>  /*                    My living room         Joris Hartog */
-#include <math.h>   /* $ g++ -lm -std=c++11 -o pt pt.cpp                 2019 */
-#include <thread>   /* $ ./pt > room.ppm                            curlba.sh */
-typedef char const* S;typedef std::thread X;typedef float F;typedef int I;struct
-V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c=0){x=a;y=b;z=c;}V operator+(V r){return V(x+r.x,y+
-r.y,z+r.z);}V operator*(V r){return V(x*r.x,y*r.y,z*r.z);}F operator%(V r){return x*r.x+y*r.y+z*r.z;}V operator
-!(){return*this*(1/sqrtf(*this%*this));}};F r(){return(F)rand()/RAND_MAX;}
-
-
-F A(F l,F r){return l<r?l:r;}
-
-I C(S a,I p,I l){I r=0;while(l)if(++p%8&&p%8!=2){r=(r<<1)+(128>>((p%8))&a[p/8]?1
-:0);l--;}return r;}
-
-float Q(V position, I &hitType) {
-  V dup = position; // Used to duplicate window
-  while (dup.z > 1 && dup.z < 16) dup.z -= 8;
-
-  S world =
-    "(:`     h p2a`4 p& t h%902cj`p& l h%91cj`p&&q$-4\"0cnp4& l h4\"0"
-    "cj`ri&q$-%90cnp6i l h%90cj`p&&q\"1%90cnwd& l h%90cj`qu&q$%#i0cnp5u l h#i0"
-    "cjot&&q$-%9074`&  # <!e(n1`&!4#!5!e(n0q#!4#<>!e(n0b>a4# <!e(n0`&%t# <!e(n0"
-    "`&!4# < 9(n0`&  ?!5 $(n0b>` ?!5 $(n0`&  #!5 $  0b>` # < $  07iu0(#;f.&(n0"
-    "q?0(#jz.&(n0*ch/02+`f5`020;a&`d8&%!m)qa:`3k%= ,)q02a8``6%a 0))020"
-   "<bpp4+&)$1-&2'!2020,04#`0, 4&00=a fd#$1 4  0>afc4e\"m }(z2 \"202arc4e#% }(z2"
-   "\"\"20200";
-  F closest_distance = 1e4;
-  F dis_stack[128];
-  I sp = 0, currentHitType, ht_stack[128];
-
-  while(*++world){
-    if (*world == 48) // Min
-      if(dis_stack[sp--] < dis_stack[sp]) {
-        dis_stack[sp] = dis_stack[sp+1];
-        ht_stack[sp] = ht_stack[sp+1];
-      }
-    if (*world == 49 && dis_stack[sp--] > 1) // Skip if not less than 1
-      while(*++world != 55);
-    if (*world == 50) // Invert
-      dis_stack[sp] = -dis_stack[sp];
-    if (*world == 52) // Toggle duplicate
-      dup = position;
-    if ((*world & 0b01011000) == 0b00011000) // Set Object
-      currentHitType = *world & 0b111;
-    if(*world&0b01000000) { // BoxTest
-      F ll_A = C(world, 2, 10) / pow(10, C(world, 14, 2)) - 1;
-      F ll_B = C(world, 18, 7) / pow(10, C(world, 27, 2));
-      F ll_C = C(world, 29, 7) / pow(10, C(world, 38, 1)) - 9;
-      V lowerLeft = dup + V(ll_A, ll_B, ll_C)*-1;
-      F ur_A = C(world, 40, 10) / pow(10, C(world, 53, 2));
-      F ur_B = C(world, 56, 10) / pow(10, C(world, 69, 2));
-      F ur_C = C(world, 72, 10) / pow(10, C(world, 85, 2)) - 8.6;
-      V upperRight = V(ur_A, ur_B, ur_C) + dup*-1;
-      F d = -A(A(
-        A(lowerLeft.x, upperRight.x),
-        A(lowerLeft.y, upperRight.y)),
-        A(lowerLeft.z, upperRight.z));
-      dis_stack[++sp] = d;
-      ht_stack[sp] = currentHitType;
-      world += 10;
-    }
-    else if((*world&0b01011000) == 0b00001000) { // CilinderTest
-      F bot_A = 6.5 + C(world, 4, 1) * 2.3;
-      F bot_B = C(world, 5, 1) * 1.5 + C(world, 6, 1) * 0.02;
-      F bot_C = -7.5 + C(world, 8, 1) * 8.2;
-      F height = C(world, 10, 7) / pow(10,C(world, 19, 2));
-      F width = C(world, 21, 8) / pow(10,C(world, 31, 2));
-      world += 4;
-      V bottom(bot_A, bot_B, bot_C);
-      V delta = dup + bottom * -1;
-      V down = delta;
-      delta.y = 0;
-      V up = bottom + V(0, height, 0) + dup * -1;
-      dis_stack[++sp] = -A(width - sqrtf(delta%delta), A(down.y, up.y));
-      ht_stack[sp] = currentHitType;
-    } else if(!(*world & 0b01011000)) { // SphereTest
-      F center_A = 4.2 + (*world & 0b100) + (*world & 0b10) * 0.3;
-      F center_B = 1.4 + (*world & 0b1) * 6.6;
-      F center_C = (*++world & 0b10) * 0.15 - 7.5;
-      F radius = 0.05 + (*world & 0b1) * 1.45;
-      V center(center_A, center_B, center_C);
-      V delta = dup + center*-1;
-      dis_stack[++sp] = sqrtf(delta%delta) - radius;
-      ht_stack[sp] = currentHitType;
-    }
-  }
-  closest_distance = dis_stack[sp];
-  hitType = ht_stack[sp];
-
-  float sun = 11 - position.x;
-  if (sun < closest_distance) closest_distance = sun, hitType = 1;
-
-  return closest_distance;
-}
-
-I M(V o,V v,V&p,V&n){I t,c=0;F d;for(F a=0;a<99;a+=d)if((d=Q(p=o+v*a,t))<0.01||
-++c>99)return n=!V(Q(p+V(.01,0),c)-d,Q(p+V(0,.01),c)-d,Q(p+V(0,0,.01),c)-d),t;return 0;}
-V T(V o,V d){V q,n,e,a=1,w(!V(1,1,3));for(I x=3;x--;){I t=M(o,d,q,n);if(t==1){e
-=e+a*V(51,81,99);break;}F i=n%w;if(t>3){d=d+n*(n%d*-2);o=q+d*0.1;a=a*(t==6?0.6:
-(t==4?0.01:0.05));if(t!=5)d=!(d+V(r(),r(),r())*0.2);}if(t>1&&t<4){F p=6.28*r(),
-c=r(),s=sqrtf(1-c),g=n.z<0?-1:1,u=-1/(g+n.z),v=n.x*n.y*u;d=V(v,g+n.y*n.y*u,-n.y
-)*(cosf(p)*s)+V(1+g*n.x*n.x*u,g*v,-g*n.x)*(sinf(p)*s)+n*sqrtf(c);o=q+d*.1;a=a*0.2
-;}if(t!=5&&i>0&&M(q+n*.1,w,q,n)==1)e=e+a*(t==3?V(200,600,400):(t==4?V(100):V(500,
-400,100)))*i;}return e;}void t(V* a,V b,V c){*a=*a+T(b,c);}
-I main(){I w=960,h=540,s=32;V o(1,5,9),g=!(V(8,4,-8)+o*-1),l=!V(g.z,0,-g.x)*(1./w
-),u(g.y*l.z-g.z*l.y,g.z*l.x-g.x*l.z,g.x*l.y-g.y*l.x);X**e=(X**)malloc(sizeof(X*)
-*s);printf("P6 %d %d 255 ",w,h);for(I y=h;y--;)for(I x=w;x--;){V c;for(I p=s;p--
-;)e[p]=new X(t,&c,o,!(g+l*(x-w/2+r())+u*(y-h/2+r())));for(I p=s;p--;)e[p]->join(
-);c=c*(1./s)+14./241;V o=c+1;c=V(c.x/o.x,c.y/o.y,c.z/o.z)*255;printf("%c%c%c",(I
-)c.x,(I)c.y,(I)c.z);}}
 
 /// The program:
 //  padding -> "("
