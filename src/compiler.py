@@ -160,9 +160,6 @@ class Compiler(object):
                 ascii_possible.append(character)
                 character = ''
                 count = 0
-        if character:
-            character += '0'*(8-len(character))
-            ascii_possible.append(character)
         characters = ''
         for char in ascii_possible:
             characters += chr(int(char, 2))
@@ -171,21 +168,20 @@ class Compiler(object):
     @property
     def bitstream(self):
         """Converts an AST into a string of zeroes and ones."""
-        try:
-            if not self._bitstream:
-                if isinstance(self.AST[0], list):
-                    for branch in self.AST:
-                        compiler = Compiler(branch)
-                        self._bitstream += compiler.bitstream
-                else:
-                    token_type = self.AST[0]['type']
-                    assert token_type in self._compile_functions
-                    compile_function = self._compile_functions[token_type]
-                    self._bitstream = compile_function(self.AST)
-            return self._bitstream
-        except Exception as e:
-            logging.error('Could not compile AST!')
-            raise
+        if not self._bitstream:
+            if isinstance(self.AST[0], list):
+                for branch in self.AST:
+                    compiler = Compiler(branch)
+                    self._bitstream += compiler.bitstream
+            else:
+                token_type = self.AST[0]['type']
+                compile_function = self._compile_functions.get(token_type,
+                        None)
+                if not compile_function:
+                    raise SyntaxError(self.AST[0]['value'])
+                self._bitstream = compile_function(self.AST)
+            self._bitstream += '0'*(len(self._bitstream) % 6)
+        return self._bitstream
 
     def _compile_box(self, AST):
         """Compiles a box() function."""
