@@ -25,6 +25,30 @@ import logging
 import re
 import argparse
 
+def numToBinary(num, base_length, exponent_length):
+    """Converts a float into a string of zeroes and ones."""
+    logging.debug('Converting to binary: %s', num)
+    if '.' in num:
+        base = float(num.strip())
+    else:
+        base = int(num.strip())
+    sign_binary = '0'
+    if base < 0:
+        sign_binary = '1'
+        base = -base
+    exponent = 0
+    while (base % 1) > 0.01 or (base % 1) < -0.01:
+        base *= 10
+        exponent += 1
+    base_binary = '{0:b}'.format(int(base))
+    exponent_binary = '{0:b}'.format(int(exponent))
+    assert len(base_binary) <= base_length
+    assert len(exponent_binary) <= exponent_length
+    binary = sign_binary
+    binary += '0'*(base_length-len(base_binary)) + base_binary
+    binary += '0'*(exponent_length-len(exponent_binary)) + exponent_binary
+    return binary
+
 class Lexer(object):
     """Lexer
 
@@ -179,40 +203,47 @@ class Compiler(object):
                         None)
                 if not compile_function:
                     raise SyntaxError(self.AST[0]['value'])
-                self._bitstream = compile_function(self.AST)
+                self._bitstream = compile_function()
             self._bitstream += '0'*(len(self._bitstream) % 6)
         return self._bitstream
 
-    def _compile_box(self, AST):
+    def _compile_box(self):
         """Compiles a box() function."""
-        return ''
+        binary = '1'
+        binary += numToBinary(self.AST[2]['value'], 10, 2)
+        binary += numToBinary(self.AST[4]['value'], 7, 2)
+        binary += numToBinary(self.AST[6]['value'], 7, 1)
+        binary += numToBinary(self.AST[8]['value'], 10, 2)
+        binary += numToBinary(self.AST[10]['value'], 10, 2)
+        binary += numToBinary(self.AST[12]['value'], 10, 2)
+        return binary
 
-    def _compile_sphere(self, AST):
+    def _compile_sphere(self):
         """Compiles a sphere() function."""
         return ''
         ''
 
-    def _compile_cilinder(self, AST):
+    def _compile_cilinder(self):
         """Compiles a cilinder() function."""
         return ''
 
-    def _compile_set(self, AST):
+    def _compile_set(self):
         """Compiles a set_type() function."""
         return ''
 
-    def _compile_if(self, AST):
+    def _compile_if(self):
         """Compiles an if-statement."""
         return ''
 
-    def _compile_invert(self, AST):
+    def _compile_invert(self):
         """Compiles an invert() function."""
         return '01010'
 
-    def _compile_toggle(self, AST):
+    def _compile_toggle(self):
         """Compiles a toggle_duplicate() function."""
         return '01011'
 
-    def _compile_min(self, AST):
+    def _compile_min(self):
         """Compiles a min() function."""
         return '011'
 
