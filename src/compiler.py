@@ -220,11 +220,22 @@ class Compiler(object):
 
     def _compile_sphere(self):
         """Compiles a sphere() function."""
-        return ''
+        binary = '000'
+        binary += numToBinary(self.AST[2]['value'], 7, 1)
+        binary += numToBinary(self.AST[4]['value'], 4, 1)
+        binary += numToBinary(self.AST[6]['value'], 7, 1)
+        binary += numToBinary(self.AST[8]['value'], 4, 2)
+        return binary
 
     def _compile_cilinder(self):
         """Compiles a cilinder() function."""
-        return ''
+        binary = '001'
+        binary += numToBinary(self.AST[2]['value'], 7, 1)
+        binary += numToBinary(self.AST[4]['value'], 8, 2)
+        binary += numToBinary(self.AST[6]['value'], 7, 1)
+        binary += numToBinary(self.AST[8]['value'], 7, 2)
+        binary += numToBinary(self.AST[10]['value'], 8, 2)
+        return binary
 
     def _compile_set(self):
         """Compiles a set_type() function."""
