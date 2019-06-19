@@ -291,7 +291,7 @@ def run(filename):
     code = read_file(filename)
     parser = Parser(code)
     compiler = Compiler(parser.AST)
-    print(compiler.bytecode)
+    print('Program: "{}"'.format(compiler.bytecode))
 
 if __name__ == "__main__":
     args = parse_args()
