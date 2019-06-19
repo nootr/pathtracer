@@ -240,7 +240,7 @@ class Compiler(object):
     def _compile_set(self):
         """Compiles a set_type() function."""
         binary = '01000'
-        binary += numToBinary(self.AST[2]['value'], 3, 0)
+        binary += numToBinary(self.AST[2]['value'], 3, 1)
         return binary
 
     def _compile_if(self):
@@ -248,7 +248,7 @@ class Compiler(object):
         compiler = Compiler(self.AST[2:-2])
         subbinary = compiler.bitstream
         binary = '01001'
-        binary += numToBinary(len(subbinary), 5, 0)
+        binary += numToBinary(len(subbinary), 5, 1)
         binary += subbinary
         return binary
 
