@@ -221,7 +221,6 @@ class Compiler(object):
     def _compile_sphere(self):
         """Compiles a sphere() function."""
         return ''
-        ''
 
     def _compile_cilinder(self):
         """Compiles a cilinder() function."""
@@ -229,11 +228,18 @@ class Compiler(object):
 
     def _compile_set(self):
         """Compiles a set_type() function."""
-        return ''
+        binary = '01000'
+        binary += numToBinary(self.AST[2]['value'], 3, 0)
+        return binary
 
     def _compile_if(self):
         """Compiles an if-statement."""
-        return ''
+        compiler = Compiler(self.AST[2:-2])
+        subbinary = compiler.bitstream
+        binary = '01001'
+        binary += numToBinary(len(subbinary), 5, 0)
+        binary += subbinary
+        return binary
 
     def _compile_invert(self):
         """Compiles an invert() function."""
