@@ -26,13 +26,15 @@ import logging
 import re
 import argparse
 
-def numToBinary(num, base_length, exponent_length):
+def numToBinary(num, base_length, exponent_length, invert=False):
     """Converts a float into a string of zeroes and ones."""
     logging.debug('Converting to binary: %s', num)
     if '.' in num:
         base = float(num.strip())
     else:
         base = int(num.strip())
+    if invert:
+        base = -base
     sign_binary = '0'
     if base < 0:
         sign_binary = '1'
@@ -219,9 +221,9 @@ class Compiler(object):
     def _compile_box(self):
         """Compiles a box() function."""
         binary = '1'
-        binary += numToBinary(self.AST[2]['value'], 10, 2)
-        binary += numToBinary(self.AST[4]['value'], 7, 2)
-        binary += numToBinary(self.AST[6]['value'], 7, 1)
+        binary += numToBinary(self.AST[2]['value'], 10, 2, invert=True)
+        binary += numToBinary(self.AST[4]['value'], 7, 2, invert=True)
+        binary += numToBinary(self.AST[6]['value'], 7, 1, invert=True)
         binary += numToBinary(self.AST[8]['value'], 10, 2)
         binary += numToBinary(self.AST[10]['value'], 10, 2)
         binary += numToBinary(self.AST[12]['value'], 10, 2)

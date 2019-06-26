@@ -15,7 +15,7 @@ c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r){R V(x*r.x,y*r.y,z*r.z);}F O%(V r)
 //  box(9, 3, -6, 13, 10, 0);
 //  min();invert();
 //  halt();
-S w = "06 ( $2 4 , *d!(!d, : *  #4n";
+S w = "04 (  2 4 , *f!)!`, : *  #4n";
 I p;
 
 I C(I l=1) {
@@ -64,7 +64,7 @@ float Q(V position, I &hitType) {
         x=D(10,2), y=D(10,2), z=D(10,2);
 //      fprintf(stderr, "box(%f, %f, %f, %f, %f, %f);\n",
 //          a, b, c, x, y, z);
-      V l = dup + V(-a, -b, -c), // Todo; verkleinen
+      V l = dup + V(a, b, c),
       u = V(x, y, z) + dup*-1;
       dis_stack[++sp] = -A(A(A(l.x,u.x),A(l.y,u.y)),A(l.z,u.z));
       type_stack[sp] = currentHitType;
