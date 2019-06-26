@@ -14,6 +14,7 @@ c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r){R V(x*r.x,y*r.y,z*r.z);}F O%(V r)
 //  box(-1, 0, -9, 10, 12, 21);
 //  box(9, 3, -6, 13, 10, 0);
 //  min();invert();
+//  halt();
 S w = "06 ( $2 4 , *d!(!d, : *  #4n";
 I p;
 
@@ -35,16 +36,6 @@ float SphereTest(V position, V center, float radius) {
   return sqrtf(delta % delta) - radius;
 }
 
-float BoxTest(V position, V lowerLeft, V upperRight) {
-  lowerLeft = position + lowerLeft * -1;
-  upperRight = upperRight + position * -1;
-  return -A(
-          A(
-                  A(lowerLeft.x, upperRight.x),
-                  A(lowerLeft.y, upperRight.y)),
-          A(lowerLeft.z, upperRight.z));
-}
-
 float CilinderTest(V position, V bottom, float height, float width) {
   V delta = position + bottom * -1;
   delta.y = 0;
@@ -62,53 +53,66 @@ float Q(V position, I &hitType) {
   V dup = position; // Used to duplicate window
   while (dup.z > 1 && dup.z < 16) dup.z -= 8;
 
-  F distance = 1337, b;
-  fprintf(stderr, "Q start\n");
+  F distance, b, dis_stack[9], type_stack[9];
+//  fprintf(stderr, "Q start\n");
   p = -1;
+  I currentHitType, sp = 0;
+
   while(w[p/8]){
     if(b=C()) { // 1 box()
       F a=D(10,2), b=D(7, 2), c=D(7, 1),
         x=D(10,2), y=D(10,2), z=D(10,2);
-      fprintf(stderr, "box(%f, %f, %f, %f, %f, %f);\n",
-          a, b, c, x, y, z);
+//      fprintf(stderr, "box(%f, %f, %f, %f, %f, %f);\n",
+//          a, b, c, x, y, z);
+      V l = dup + V(-a, -b, -c), // Todo; verkleinen
+      u = V(x, y, z) + dup*-1;
+      dis_stack[++sp] = -A(A(A(l.x,u.x),A(l.y,u.y)),A(l.z,u.z));
+      type_stack[sp] = currentHitType;
     } else { // 0
       if(b=C()) { // 01
         if(b=C()) { // 011 min()
-          fprintf(stderr, "min();\n");
+//          fprintf(stderr, "min();\n");
+          if(dis_stack[sp--] < dis_stack[sp]) {
+            dis_stack[sp] = dis_stack[sp+1];
+            type_stack[sp] = type_stack[sp+1];
+          }
         } else { // 010
           if(b=C()) { // 0101
-            if(b=C()) { // 01011 toggle_duplicate()
+            if(b=C()) { // 01011
               if(b=C()) { // 010111 halt()
-                fprintf(stderr, "halt();\n");
-                while(1);
+//                fprintf(stderr, "halt();\n");
+                // while(1); // for debugging purposes
                 break;
               } else { // 010110 toggle_duplicate()
-                fprintf(stderr, "toggle_duplicate();\n");
+//                fprintf(stderr, "toggle_duplicate();\n");
               }
             } else { // 01010 invert()
-              fprintf(stderr, "invert();\n");
+//              fprintf(stderr, "invert();\n");
+              dis_stack[sp] *= -1;
             }
           } else { // 0100
             if(b=C()) { // 01001 if_less_than_one
               F a=D(5,1);
-              fprintf(stderr, "if_less_than_one -> skip %f\n",
-                  a);
+//              fprintf(stderr, "if_less_than_one -> skip %f\n",
+//                  a);
             } else { // 01000 set_type()
-              F a=D(3,0);
-              fprintf(stderr, "set_type(%f);\n", a);
+              currentHitType = D(3);
+//              fprintf(stderr, "set_type(%d);\n", currentHitType);
             }
           }
         }
       } else { // 00
         if (b=C()) { // 001 cilinder()
-          fprintf(stderr, "cilinder(?)\n");
+//          fprintf(stderr, "cilinder(?)\n");
         } else { // 000 sphere()
-          fprintf(stderr, "sphere(?)\n");
+//          fprintf(stderr, "sphere(?)\n");
         }
       }
     }
   }
 
+  distance = dis_stack[sp];
+  hitType = type_stack[sp];
 
   float sun = 11 - position.x;
   if (sun < distance) distance = sun, hitType = 1;
