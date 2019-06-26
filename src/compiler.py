@@ -11,7 +11,8 @@
 # * 01000   set_type(id);
 # * 01001   if_less_than_one { BLOCK }
 # * 01010   invert();
-# * 01011   toggle_duplicate();
+# * 010110  toggle_duplicate();
+# * 010111  halt();
 # * 011     min();
 #
 # Commands are semi-colon seperated, whitespace is ignored and all numbers are
@@ -41,12 +42,15 @@ def numToBinary(num, base_length, exponent_length):
         base *= 10
         exponent += 1
     base_binary = '{0:b}'.format(int(base))
-    exponent_binary = '{0:b}'.format(int(exponent))
+    exponent_binary = ''
+    if exponent:
+        exponent_binary = '{0:b}'.format(int(exponent))
     assert len(base_binary) <= base_length
     assert len(exponent_binary) <= exponent_length
     binary = sign_binary
     binary += '0'*(base_length-len(base_binary)) + base_binary
     binary += '0'*(exponent_length-len(exponent_binary)) + exponent_binary
+    logging.debug('Converted to binary: %s', binary)
     return binary
 
 class Lexer(object):
@@ -67,6 +71,7 @@ class Lexer(object):
                 '^invert': 'INVERT',
                 '^toggle_duplicate': 'TOGGLE',
                 '^min': 'MIN',
+                '^halt': 'HALT',
                 '^\(': 'BRACKET_OPEN',
                 '^\)': 'BRACKET_CLOSE',
                 '^{': 'CURLY_OPEN',
@@ -162,7 +167,8 @@ class Compiler(object):
                 'INVERT': self._compile_invert,
                 'TOGGLE': self._compile_toggle,
                 'MIN': self._compile_min,
-                'SEMICOLON': self._noop
+                'SEMICOLON': self._noop,
+                'HALT': self._compile_halt
                 }
 
     @property
@@ -171,7 +177,9 @@ class Compiler(object):
         ascii_possible = []
         character = ''
         count = 0
-        for c in self.bitstream:
+        logging.debug('ASCII-enabling bitstream: %s', self.bitstream)
+        bitstream = self.bitstream + '0'*(len(self.bitstream) % 6)
+        for c in bitstream:
             if count == 0:
                 character += '0'
                 count += 1
@@ -184,6 +192,7 @@ class Compiler(object):
                 ascii_possible.append(character)
                 character = ''
                 count = 0
+        logging.debug('ASCII-enabled bitstream: %s', ascii_possible)
         characters = ''
         for char in ascii_possible:
             characters += chr(int(char, 2))
@@ -204,7 +213,7 @@ class Compiler(object):
                 if not compile_function:
                     raise SyntaxError(self.AST[0]['value'])
                 self._bitstream = compile_function()
-            self._bitstream += '0'*(len(self._bitstream) % 6)
+                logging.debug('Bitstream: %s', self._bitstream)
         return self._bitstream
 
     def _compile_box(self):
@@ -240,7 +249,7 @@ class Compiler(object):
     def _compile_set(self):
         """Compiles a set_type() function."""
         binary = '01000'
-        binary += numToBinary(self.AST[2]['value'], 3, 1)
+        binary += numToBinary(self.AST[2]['value'], 3, 0)
         return binary
 
     def _compile_if(self):
@@ -258,11 +267,15 @@ class Compiler(object):
 
     def _compile_toggle(self):
         """Compiles a toggle_duplicate() function."""
-        return '01011'
+        return '010110'
 
     def _compile_min(self):
         """Compiles a min() function."""
         return '011'
+
+    def _compile_halt(self):
+        """Compiles a halt() function."""
+        return '010111'
 
     def _noop(self):
         """Do nothing."""

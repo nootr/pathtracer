@@ -8,10 +8,27 @@
 typedef char const* S;typedef std::thread X;typedef float F;F A(F l,F r){R l<r?l
 :r;}typedef int I;struct V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c=0){x=a;y=b;z=
 c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r){R V(x*r.x,y*r.y,z*r.z);}F O%(V r)
-{R x*r.x+y*r.y+z*r.z;}V O!(){R*this*(1/sqrtf(*this%*this));}};I C(S a,I p,I l){I
-r=0;while(l)if(++p%8&&p%8!=2){r=(r<<1)+(128>>((p%8))&a[p/8]?1:0);l--;}R r;}F r()
-{R(F)rand()/RAND_MAX;}
+{R x*r.x+y*r.y+z*r.z;}V O!(){R*this*(1/sqrtf(*this%*this));}};
 
+//  set_type(2);
+//  box(-1, 0, -9, 10, 12, 21);
+//  box(9, 3, -6, 13, 10, 0);
+//  min();invert();
+S w = "06 ( $2 4 , *d!(!d, : *  #4n";
+I p;
+
+I C(I l=1) {
+  I r=0;
+  while (l)
+    if (++p % 8 && p % 8 != 2) {
+      r = (r<<1) + ((128>>(p%8))&w[p/8]?1:0);
+      l--;
+    }
+  R r;
+}
+
+F D(I b=1,I e=0){I m=C(1);R (m?-1:1)*C(b)/pow(10,C(e));}
+F r(){R(F)rand()/RAND_MAX;}
 
 float SphereTest(V position, V center, float radius) {
   V delta = position + center * -1;
@@ -45,120 +62,53 @@ float Q(V position, I &hitType) {
   V dup = position; // Used to duplicate window
   while (dup.z > 1 && dup.z < 16) dup.z -= 8;
 
-  float distance = BoxTest(position, V(2.2, 2.6, -8.8), V(6.8, 5, -8.6));
-  hitType = 5;
-
-  float roomDist = -A(// Room
-                        BoxTest(dup, V(-1, 0, -9), V(10, 12, 21)),
-                        // Window
-                        BoxTest(dup, V(9, 3, -6), V(13, 10, 0)));
-  if (roomDist < distance) distance = roomDist, hitType = 2;
-
-  // Window
-  roomDist = BoxTest(dup, V(10.7, 3, -6), V(11, 10, 0));
-  if (roomDist < 1) {
-    roomDist = BoxTest(dup, V(10.7, 3, -6), V(10.8, 6.7, -5.4));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(dup, V(10.9, 6.5, -6), V(11, 10, -5.4));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(dup, V(10.7, 3, -0.6), V(10.8, 6.7, 0));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(dup, V(10.9, 6.5, -0.6), V(11, 10, 0));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(dup, V(10.7, 3, -6), V(10.8, 3.6, 0));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(dup, V(10.9, 9.4, -6), V(11, 10, 0));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(dup, V(10.7, 3, -3.2), V(10.8, 6.5, -2.8));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(dup, V(10.9, 6.5, -3.2), V(11, 10, -2.8));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(dup, V(10.7, 6.3, -6), V(10.8, 6.7, 0));
+  F distance = 1337, b;
+  fprintf(stderr, "Q start\n");
+  p = -1;
+  while(w[p/8]){
+    if(b=C()) { // 1 box()
+      F a=D(10,2), b=D(7, 2), c=D(7, 1),
+        x=D(10,2), y=D(10,2), z=D(10,2);
+      fprintf(stderr, "box(%f, %f, %f, %f, %f, %f);\n",
+          a, b, c, x, y, z);
+    } else { // 0
+      if(b=C()) { // 01
+        if(b=C()) { // 011 min()
+          fprintf(stderr, "min();\n");
+        } else { // 010
+          if(b=C()) { // 0101
+            if(b=C()) { // 01011 toggle_duplicate()
+              if(b=C()) { // 010111 halt()
+                fprintf(stderr, "halt();\n");
+                while(1);
+                break;
+              } else { // 010110 toggle_duplicate()
+                fprintf(stderr, "toggle_duplicate();\n");
+              }
+            } else { // 01010 invert()
+              fprintf(stderr, "invert();\n");
+            }
+          } else { // 0100
+            if(b=C()) { // 01001 if_less_than_one
+              F a=D(5,1);
+              fprintf(stderr, "if_less_than_one -> skip %f\n",
+                  a);
+            } else { // 01000 set_type()
+              F a=D(3,0);
+              fprintf(stderr, "set_type(%f);\n", a);
+            }
+          }
+        }
+      } else { // 00
+        if (b=C()) { // 001 cilinder()
+          fprintf(stderr, "cilinder(?)\n");
+        } else { // 000 sphere()
+          fprintf(stderr, "sphere(?)\n");
+        }
+      }
+    }
   }
-  if (roomDist < distance) distance = roomDist, hitType = 2;
 
-  // Locker
-  roomDist = BoxTest(position, V(2, 0, -8.8), V(7, 2.5, -7.2));
-  if (roomDist < 1) {
-    roomDist = BoxTest(position, V(2, 0.5, -8.8), V(2.1, 2.5, -7.2));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(4.45, 0.5, -8.8), V(4.55, 2.5, -7.2));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(6.9, 0.5, -8.8), V(7, 2.5, -7.2));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(2, 2.3, -8.8), V(7, 2.5, -7.2));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(2, 0.5, -8.8), V(7, 0.6, -7.2));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(2, 0, -7.4), V(2.1, 1, -7.2));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(6.9, 0, -7.4), V(7, 1, -7.2));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(2, 0, -8.8), V(2.1, 1, -8.6));
-    if (roomDist < distance) distance = roomDist, hitType = 2;
-
-    roomDist = BoxTest(position, V(6.9, 0, -8.8), V(7, 1, -8.6));
-  }
-  if (roomDist < distance) distance = roomDist, hitType = 2;
-
-  roomDist = A(
-      -A(
-        -BoxTest(position, V(4.1, 1.3, -7.2), V(4.3, 1.5, -7.17)),
-        -SphereTest(position, V(4.2, 1.4, -7.2), 0.05)
-        ),
-      -A(
-        -BoxTest(position, V(4.7, 1.3, -7.2), V(4.9, 1.5, -7.17)),
-        -SphereTest(position, V(4.8, 1.4, -7.2), 0.05)
-        )
-      );
-  if (roomDist < distance) distance = roomDist, hitType = 6;
-
-  roomDist = A(A(
-      -A(
-      -BoxTest(position, V(7.8, 6.5, -8.5), V(9.8, 6.8, -6.5)),
-      -SphereTest(position, V(8.8, 8, -7.5), 1.5)
-      ),
-      CilinderTest(position, V(8.8, 0, -7.5), 6.5, 0.03)
-      ),
-      CilinderTest(position, V(8.8, 0, -7.5), 0.1, 0.6)
-      );
-  if (roomDist < distance) distance = roomDist, hitType = 4;
-
-  roomDist = A(
-      BoxTest(position, V(2.14, 0.64, -8.8), V(4.41, 2.26, -7.2)),
-      BoxTest(position, V(4.59, 0.64, -8.8), V(6.86, 2.26, -7.2))
-      );
-  if (roomDist < distance) distance = roomDist, hitType = 2;
-
-  roomDist = -A(
-    -A(
-      BoxTest(position, V(2.5, 0.2, 3), V(9.7, 2.7, 7)),
-      BoxTest(position, V(3.5, 1, 2.7), V(8.7, 3, 7))
-      ),
-    BoxTest(position, V(3.4, 2, 2), V(8.8, 4, 6))
-    );
-  if (roomDist < distance) distance = roomDist, hitType = 3;
-
-  roomDist = -A(
-    -CilinderTest(position, V(6.5, 1.5, .7), 0.14, 1.5),
-    CilinderTest(position, V(6.5, 1.52, .7), 0.2, 1.49)
-  );
-  if (roomDist < distance) distance = roomDist, hitType = 2;
 
   float sun = 11 - position.x;
   if (sun < distance) distance = sun, hitType = 1;
@@ -184,35 +134,6 @@ l.z-g.z*l.y,g.z*l.x-g.x*l.z,g.x*l.y-g.y*l.x);printf("P6 %d %d 255 ",w,h);X**e=(X
 new X(t,&c,o,!(g+l*(x-w/2+r())+u*(y-h/2+r())));for(I p=s;p--;)e[p]->join();c=c*(
 1./s)+14./241;V o=c+1;c=V(c.x/o.x,c.y/o.y,c.z/o.z)*255;printf("%c%c%c",(I)c.x,(I
                                 )c.y,(I)c.z);}}
-
-
-  /* Stack based system with the following instructions:
-   * - 0bX0X0 0... SphereTest: [4.2,4.8,8.8] a 2 bits (4.2 + 0b10*4 + 0b01*0.6)
-   *                      [1.4,8.0] a 1 bit (1.4 + 0b1*6.6)
-   *                      [-7.2,-7.5] a 1 bit (-7.5 + 0b1*0.3)
-   *                      [0.05,1.50] a 1 bit (0.05 + 0b1*1.45)
-   * - 0bX1X. .... BoxTest: [-1>4.45] a 12 bits ((-1 + 0b111111111100)*10^-0b11)
-   *                   [0>9.40] a 9 bits (0b111111100*10^-0b11)
-   *                   [-9>3.0] a 8 bits ((-9 + 0b11111110)*10^-0b1)
-   *                   [2.1>9.80] a 12 bits (0b111111111100*10^-0b11)
-   *                   [0.6>6.80] a 12 bits (0b111111111100*10^-0b11)
-   *                   [-8.6>21.0] a 10 bits ((-86 + 0b1111111100*)10^-0b11)
-   * - 0bX0X0 1... CilinderTest: [6.5,8.8] a 1 bit (6.5 + 0b1*2.3)
-   *                        [0, 1.5, 1.52] a 2 bits (0b10*1.5 + 0b01*0.02)
-   *                        [-7.5,0.7] a 1 bit (-7.5 + 0b1*8.2)
-   *                        [0.1>1.40] a 10 bits (0b1111111100*10^-0b11)
-   *                        [0.1>1.49] a 10 bits (0b1111111100*10^-0b11)
-   * - 0bX0X1 1... SetObject(0b111)
-   * - 0bX0X1 0000 '0' Min(stack.pop(2))
-   * - 0bX0X1 0001 '1' if(stack.pop(1) < 1)
-   * - 0bX0X1 0010 '2' Invert(stack.pop(1))
-   * - 0bX0X1 0100 '4' ToggleDuplicate
-   * - 0bX0X1 0110 '7' endif
-   *
-   * ASCII characters are printable between 0b00100000 and 0b01111111, so the
-   * first bit must be zero and the third bit must be 1. This means we only have
-   * 6 bits of data per character, with a bitmask of 0b01011111.
-   */
 
 
 /// The program:
