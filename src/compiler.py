@@ -269,11 +269,13 @@ class Compiler(object):
         return binary
 
     def _compile_if(self):
-        """Compiles an if-statement."""
+        """Compiles an if-statement. Normally, the number of bits which needs to
+        be skipped when the value is above 1 is given, but in this case it's
+        skipped as the block happens to always be 576 bits."""
         compiler = Compiler(self.AST[1:-1])
         subbinary = compiler.bitstream
         binary = '01001'
-        binary += numToBinary(len(subbinary), 10, 0)
+        #binary += numToBinary(len(subbinary), 10, 0)
         binary += subbinary
         return binary
 

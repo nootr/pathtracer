@@ -16,7 +16,7 @@ c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r){R V(x*r.x,y*r.y,z*r.z);}F O%(V r)
 //  min();invert();
 //  halt();
 //S w = "04 (  2 4 , *f!)!`, : *  #4n";
-S w = "04 (  2 4 , *f!)!`, : *  #5c6p8# %`\"`  e(&-;!`,#8a#8;.-k`h, 6 *(;.-;!`-#8a#0 &-k`h- 6 *  &-;!`,#8`d0 &-ko(, 6 *  &-;!a!#8a!8..-k`i! 6 *(.*v 0 \"q . 98d*4`8!$*k$\"j!eb0{>t*k$x|!eb0xbl*k$ x!eb0x!$nk$ x!eb0x!$*k$ x 9b0x!  )4\"j $b0xbh )4 x $b0x!  +$\"j $blyk6!+$w,.&b0{ev!+%5t.&b0e!`}!x= }44&f('`2e9j:#p98)`p84#: <pc8$fx5t 8 <:l(f\"((%a ( &&ih3$yp55ab0b,0506*&7>j:f5b #+h* ye8` rx\"`9:%p69i6(1$ i%90v%+&j1!6`/=fr`57<b64u87l:i$&* }v;*!a=r)934vn";
+S w = "04 (  2 4 , *f!)!`, : *  #5c6p8# %`\"`  g&m`p&!l0al-g&up4& + %$-g&m`p&al0ah #&up4&`+ %  #&m`p&!l02( #&uwd& + %  #&m`p`al0`l''&up4``+ %$'%; ( !8`' ,l2%. 1\"jq j`98d.wm\"jq./ 98d.(k\"jq . 98d. 1+jq . 98d. 1\"jq . &8d. 0 \"5 j`!(d.(j \"5 . !(d. 0 \"q j`!(k.:u`2q-s#ahd.y=`2q5=#ahd)08/0>'0/5%!ib!x$i6:f`|&6\"8,&% v`',(v!)n%= & '&k\")`b\"!80\" !aj:$q.<%588d(c$%4%baewjfie8` rz\"`.96( ,n h&6a<%f:5b$1 *164-a2qjd05h#w9lh%5w(ee-6%{&j1!b`/=fr`87<b64u-k`";
 I p;
 
 I C(I l=1) {
@@ -75,10 +75,9 @@ float Q(V position, I &hitType) {
               dis_stack[sp] *= -1;
             }
           } else { // 0100
-            if(b=C()) { // 01001 if_less_than_one
-              F a=D(10);
-              fprintf(stderr, "if_less_than_one -> skip %f\n",
-                  a);
+            if(b=C()) { // 01001 if_less_than_one (skip 576 bits)
+              fprintf(stderr, "if_less_than_one -> skip 576 bits\n");
+//              if(dis_stack[sp] > 1)C(576);
             } else { // 01000 set_type()
               currentHitType = D(3); // TODO; inkorten door rotate_type te maken
               fprintf(stderr, "set_type(%d);\n", currentHitType);
