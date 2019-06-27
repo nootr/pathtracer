@@ -77,7 +77,7 @@ float Q(V position, I &hitType) {
           } else { // 0100
             if(b=C()) { // 01001 if_less_than_one (skip 576 bits)
               fprintf(stderr, "if_less_than_one -> skip 576 bits\n");
-//              if(dis_stack[sp] > 1)C(576);
+              if(dis_stack[sp] > 1)C(576);
             } else { // 01000 rotate_type()
               currentHitType++;
               fprintf(stderr, "set_type(%d);\n", currentHitType);
