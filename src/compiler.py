@@ -8,7 +8,7 @@
 # * 1       box(down_x, down_y, down_z, up_x, up_y, up_z);
 # * 000     sphere(center_x, center_y, center_z, radius);
 # * 001     cilinder(bottom_x, bottom_y, bottom_z, height, width);
-# * 01000   set_type(id);
+# * 01000   rotate_type();
 # * 01001   if_less_than_one { BLOCK }
 # * 01010   invert();
 # * 010110  toggle_duplicate();
@@ -78,7 +78,7 @@ class Lexer(object):
                 '^box': 'BOX',
                 '^sphere': 'SPHERE',
                 '^cilinder': 'CILINDER',
-                '^set_type': 'SET',
+                '^rotate_type': 'ROTATE',
                 '^if_less_than_one': 'IF',
                 '^invert': 'INVERT',
                 '^toggle_duplicate': 'TOGGLE',
@@ -178,7 +178,7 @@ class Compiler(object):
                 'BOX': self._compile_box,
                 'SPHERE': self._compile_sphere,
                 'CILINDER': self._compile_cilinder,
-                'SET': self._compile_set,
+                'ROTATE': self._compile_rotate,
                 'IF': self._compile_if,
                 'INVERT': self._compile_invert,
                 'TOGGLE': self._compile_toggle,
@@ -262,10 +262,9 @@ class Compiler(object):
         binary += numToBinary(self.AST[10]['value'], 8, 2)
         return binary
 
-    def _compile_set(self):
-        """Compiles a set_type() function."""
+    def _compile_rotate(self):
+        """Compiles a rotate_type() function."""
         binary = '01000'
-        binary += numToBinary(self.AST[2]['value'], 3, 0)
         return binary
 
     def _compile_if(self):
