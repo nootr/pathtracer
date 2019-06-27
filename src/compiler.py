@@ -135,16 +135,20 @@ class Parser(object):
                     if token['type'] == 'IF':
                         curly_open = self._lexer.pull()
                         assert curly_open['type'] == 'CURLY_OPEN'
-                        branch = [token, curly_open]
+                        branch = [token]
+                        inner_branch = []
                         number_open = 1
                         while number_open:
                             new_token = self._lexer.pull()
                             assert new_token
+                            inner_branch.append(new_token)
                             if new_token['type'] == 'CURLY_OPEN':
                                 number_open += 1
                             elif new_token['type'] == 'CURLY_CLOSE':
                                 number_open -= 1
-                            branch.append(new_token)
+                            elif new_token['type'] == 'SEMICOLON':
+                                branch.append(inner_branch)
+                                inner_branch = []
                         self._AST.append(branch)
                     else:
                         branch = [token]
@@ -266,10 +270,10 @@ class Compiler(object):
 
     def _compile_if(self):
         """Compiles an if-statement."""
-        compiler = Compiler(self.AST[2:-2])
+        compiler = Compiler(self.AST[1:-1])
         subbinary = compiler.bitstream
         binary = '01001'
-        binary += numToBinary(len(subbinary), 7, 1)
+        binary += numToBinary(len(subbinary), 10, 0)
         binary += subbinary
         return binary
 
