@@ -29,30 +29,40 @@ import argparse
 def numToBinary(num, base_length, exponent_length, invert=False):
     """Converts a float into a string of zeroes and ones."""
     logging.debug('Converting to binary: %s', num)
-    if '.' in num:
+    if isinstance(num, int):
+        base = num
+    elif '.' in num:
         base = float(num.strip())
     else:
         base = int(num.strip())
     if invert:
         base = -base
-    sign_binary = '0'
-    if base < 0:
-        sign_binary = '1'
-        base = -base
-    exponent = 0
-    while (base % 1) > 0.01 or (base % 1) < -0.01:
-        base *= 10
-        exponent += 1
-    base_binary = '{0:b}'.format(int(base))
-    exponent_binary = ''
-    if exponent:
-        exponent_binary = '{0:b}'.format(int(exponent))
-    assert len(base_binary) <= base_length
-    assert len(exponent_binary) <= exponent_length
-    binary = sign_binary
-    binary += '0'*(base_length-len(base_binary)) + base_binary
-    binary += '0'*(exponent_length-len(exponent_binary)) + exponent_binary
-    logging.debug('Converted to binary: %s', binary)
+    binary = ''
+    try:
+        sign_binary = '0'
+        if base < 0:
+            sign_binary = '1'
+            base = -base
+        logging.debug('Sign: %s', sign_binary)
+        exponent = 0
+        while abs((base % 1)) > 0.01 and abs(1-(base % 1)) > 0.01:
+            base *= 10
+            exponent += 1
+            logging.debug('Scaling: %f * 1e-%d', base, exponent)
+        base_binary = '{0:b}'.format(int(base))
+        exponent_binary = ''
+        if exponent:
+            exponent_binary = '{0:b}'.format(int(exponent))
+        assert len(base_binary) <= base_length
+        assert len(exponent_binary) <= exponent_length
+        binary = sign_binary
+        binary += '0'*(base_length-len(base_binary)) + base_binary
+        binary += '0'*(exponent_length-len(exponent_binary)) + exponent_binary
+        logging.debug('Converted to binary: %s', binary)
+    except Exception as e:
+        logging.error('Could not convert number to binary: %s [base %d, exp %d]',
+            num, base_length, exponent_length)
+        raise
     return binary
 
 class Lexer(object):
@@ -259,7 +269,7 @@ class Compiler(object):
         compiler = Compiler(self.AST[2:-2])
         subbinary = compiler.bitstream
         binary = '01001'
-        binary += numToBinary(len(subbinary), 5, 1)
+        binary += numToBinary(len(subbinary), 7, 1)
         binary += subbinary
         return binary
 
