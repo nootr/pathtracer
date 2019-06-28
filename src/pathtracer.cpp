@@ -89,26 +89,20 @@ float Q(V position, I &hitType) {
           F a=D(7,1), b=D(8,2), c=D(7,1), x=D(7,2), y=D(8,2);
           fprintf(stderr, "cilinder(%f, %f, %f, %f, %f)\n",
               a, b, c, x, y);
-//  float CilinderTest(V position, V bottom, float height, float width) {
-//    V delta = position + bottom * -1;
-//    delta.y = 0;
-//
-//    V down = position + bottom * -1;
-//    V up = bottom + V(0, height, 0) + position * -1;
-//
-//    return -A(
-//        width - sqrtf(delta % delta),
-//        A(down.y, up.y)
-//        );
-//  }
+          V bottom = V(a, b, c),
+            delta = dup + bottom*-1,
+            down = delta,
+            up = bottom + V(0, x) + position * -1;
+          delta.y = 0;
+          dis_stack[++sp] = -A(y - sqrtf(delta % delta), A(down.y, up.y));
+          type_stack[sp] = currentHitType;
         } else { // 000 sphere()
           F a=D(7,1), b=D(4,1), c=D(7,1), x=D(4,2);
           fprintf(stderr, "sphere(%f, %f, %f, %f)\n",
               a, b, c, x);
-// float SphereTest(V position, V center, float radius) {
-//   V delta = position + center * -1;
-//   return sqrtf(delta % delta) - radius;
-// }
+          V delta = dup + V(a, b, c)*-1; // TODO: a, b, c inverteren
+          dis_stack[++sp] = sqrtf(delta % delta) - x;
+          type_stack[sp] = currentHitType;
         }
       }
     }
