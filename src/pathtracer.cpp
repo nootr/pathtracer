@@ -3,7 +3,7 @@
 #include <stdlib.h> /*                    My living room                      */
 #define R return    /*                                                        */
 #define O operator  /* $ g++ -lm -std=c++11 -o pt pt.cpp       For more info: */
-typedef char const* /* $ ./pt > room.ppm     # Wait ~5m             curlba.sh */
+typedef char const* /* $ ./pt > room.ppm                            curlba.sh */
 S;typedef float F;typedef int I;struct V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c
 =0){x=a;y=b;z=c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r){R V(x*r.x,y*r.y,z*r
 .z);}F O%(V r){R x*r.x+y*r.y+z*r.z;}V O!(){R*this*(1/sqrtf(*this%*this));}};F A(
