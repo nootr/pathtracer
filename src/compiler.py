@@ -270,12 +270,15 @@ class Compiler(object):
     def _compile_if(self):
         """Compiles an if-statement. Normally, the number of bits which needs to
         be skipped when the value is above 1 is given, but in this case it's
-        skipped as the block happens to always be 576 bits."""
-        compiler = Compiler(self.AST[1:-1])
+        skipped as the block happens to always be 675 bits."""
+        compiler = Compiler(self.AST[1:])
         subbinary = compiler.bitstream
         binary = '01001'
         #binary += numToBinary(len(subbinary), 10, 0)
         binary += subbinary
+        logging.debug('If block length: %d bytes', len(subbinary))
+        logging.debug('If block: %s', subbinary)
+        assert len(subbinary) == 675
         return binary
 
     def _compile_invert(self):

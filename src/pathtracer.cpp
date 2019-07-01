@@ -1,22 +1,15 @@
 // https://mattermost.hostnet.nl/hostnet/pl/pz8uhrwieifpdgtj6enafen4bc
-#include <stdlib.h> /*                                                        */
 #include <stdio.h>  /*                 P A T H T R A C I N G                  */
 #include <math.h>   /*                    My living room                      */
-#include <thread>   /*                                           Joris Hartog */
+#include <stdlib.h> /*                                           Joris Hartog */
 #define R return    /* $ g++ -lm -std=c++11 -o pt pt.cpp                 2019 */
 #define O operator  /* $ ./pt > room.ppm                            curlba.sh */
-typedef char const* S;typedef std::thread X;typedef float F;F A(F l,F r){R l<r?l
+typedef char const* S;typedef float F;F A(F l,F r){R l<r?l
 :r;}typedef int I;struct V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c=0){x=a;y=b;z=
 c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r){R V(x*r.x,y*r.y,z*r.z);}F O%(V r)
 {R x*r.x+y*r.y+z*r.z;}V O!(){R*this*(1/sqrtf(*this%*this));}};
 
-//  set_type(2);
-//  box(-1, 0, -9, 10, 12, 21);
-//  box(9, 3, -6, 13, 10, 0);
-//  min();invert();
-//  halt();
-//S w = "04 (  2 4 , *f!)!`, : *  #4n";
-S w = "`!  \"0\"`!`!4p)(,!`#0!0  :l:v# 8 l 4  $xul& p-b$-alxvn\"`p!8 halxul& t-b$-  8vn\"`t!8 h  8ul& p-b\"1  8vn|`p!8 h  8ul&$$-b$%`xxvn\"d$!8 h`xk8!  +$ x!eb0ip\"(56(%4#+$av}h56)qx#+$aq%856(!p#+$ap\")=6(!p#+$ap\"(56(!p s$ap\"  2h%4 )$aq%0 2h!p )$ap\"  6(%4 )%9s6l\"6)n8<-$aw+l\"6*kh<-$a*#!z#pz!zhh-,0/ e*s4t8,l$p8,*!m .81l\"3<*z , .-6$3!$$\"p`$ ##4t8g.\"jl,2$1b\"j\"q0r{u34rl0 9=!0',k$ &7 4#+1`ls2l0b(!2*rc\"ec5(`k0'ns90*kn1+*:l+v-4b#% >{-e pny$lij;7";
+S w = "`!  \"0\"`!`!4p)(,!`#0!0  :l:v# 8 l 4  $xul& p-b$-alo&up4& + %$-exul& t-b$-  /&up4&`+ %  !xul& p-b\"1  /&uwd& + %  !xul&$$-b$%`xo&up4``+ %$'%xum~`p-b$-  -; ( !8`' ,l2%. 1\"jq j`98d+v}h56)qx#+$a>(k\"jq . 98d+p\")=6(!p#+$a> 1\"jq . &8d+p\"  2h%4 )$a>(j \"5 . !(d+p\"  6(%4 )%9>(j \"q . !(k+s6l\"6)n8<-$a>y=`2q5=#ahd+*#!z#pz!zhh-,0/ e*s4t8,l$p8,*!m .81l\"3<*z , .-6$3!$$\"p`$ ##4t8g.\"jl,2$1b\"j\"q0r{u34rl0 9=!0',k$ &7 4#+1`ls2l0b(!2*rt84l:i$%: }v;*!5=r)935a>qjd08h#w9lh&%w(ee-3:x";
 I p;
 
 I C(I l=1) {
@@ -37,58 +30,58 @@ float Q(V position, I &hitType) {
   while (dup.z > 1 && dup.z < 16) dup.z -= 8;
 
   F distance, b, dis_stack[9], type_stack[9];
-  fprintf(stderr, "Q start\n");
+//  fprintf(stderr, "Q start\n");
   p = -1;
   I currentHitType=2, sp = 0;
 
   while(w[p/8]){
-    if(b=C()) { // 1 box()
+    if(C()) { // 1 box()
       F a=D(10,2), b=D(7, 2), c=D(7, 1),
         x=D(10,2), y=D(10,2), z=D(10,2);
-      fprintf(stderr, "box(%f, %f, %f, %f, %f, %f);\n",
-          -a, -b, -c, x, y, z);
+//      fprintf(stderr, "box(%f, %f, %f, %f, %f, %f);\n",
+//          -a, -b, -c, x, y, z);
       V l = dup + V(a, b, c),
       u = V(x, y, z) + dup*-1;
       dis_stack[++sp] = -A(A(A(l.x,u.x),A(l.y,u.y)),A(l.z,u.z));
       type_stack[sp] = currentHitType;
     } else { // 0
-      if(b=C()) { // 01
-        if(b=C()) { // 011 min()
-          fprintf(stderr, "min();\n");
-          if(dis_stack[sp--] < dis_stack[sp]) {
+      if(C()) { // 01
+        if(C()) { // 011 min()
+//          fprintf(stderr, "min();\n");
+          if(dis_stack[sp] < dis_stack[--sp]) {
             dis_stack[sp] = dis_stack[sp+1];
             type_stack[sp] = type_stack[sp+1];
           }
         } else { // 010
-          if(b=C()) { // 0101
-            if(b=C()) { // 01011
-              if(b=C()) { // 010111 halt()
-                fprintf(stderr, "halt();\n");
-                while(1); // for debugging purposes
+          if(C()) { // 0101
+            if(C()) { // 01011
+              if(C()) { // 010111 halt()
+//                fprintf(stderr, "halt();\n");
+//                while(1); // for debugging purposes
                 break;
               } else { // 010110 toggle_duplicate()
-                fprintf(stderr, "toggle_duplicate();\n");
+//                fprintf(stderr, "toggle_duplicate();\n");
                 dup = position;
               }
             } else { // 01010 invert()
-              fprintf(stderr, "invert();\n");
+//              fprintf(stderr, "invert();\n");
               dis_stack[sp] *= -1;
             }
           } else { // 0100
-            if(b=C()) { // 01001 if_less_than_one (skip 576 bits)
-              fprintf(stderr, "if_less_than_one -> skip 576 bits\n");
-              if(dis_stack[sp] > 1)C(576);
+            if(C()) { // 01001 if_less_than_one (skip 675 bits)
+//              fprintf(stderr, "if_less_than_one -> skip 675 bits\n");
+              if(dis_stack[sp--]>1)C(675);
             } else { // 01000 rotate_type()
               currentHitType++;
-              fprintf(stderr, "set_type(%d);\n", currentHitType);
+//              fprintf(stderr, "set_type(%d);\n", currentHitType);
             }
           }
         }
       } else { // 00
-        if (b=C()) { // 001 cilinder()
+        if (C()) { // 001 cilinder()
           F a=D(7,1), b=D(8,2), c=D(7,1), x=D(7,2), y=D(8,2);
-          fprintf(stderr, "cilinder(%f, %f, %f, %f, %f)\n",
-              a, b, c, x, y);
+//          fprintf(stderr, "cilinder(%f, %f, %f, %f, %f)\n",
+//              a, b, c, x, y);
           V bottom = V(a, b, c),
             delta = dup + bottom*-1,
             down = delta,
@@ -98,8 +91,8 @@ float Q(V position, I &hitType) {
           type_stack[sp] = currentHitType;
         } else { // 000 sphere()
           F a=D(7,1), b=D(4,1), c=D(7,1), x=D(4,2);
-          fprintf(stderr, "sphere(%f, %f, %f, %f)\n",
-              a, b, c, x);
+//          fprintf(stderr, "sphere(%f, %f, %f, %f)\n",
+//              a, b, c, x);
           V delta = dup + V(a, b, c)*-1; // TODO: a, b, c inverteren
           dis_stack[++sp] = sqrtf(delta % delta) - x;
           type_stack[sp] = currentHitType;
@@ -108,8 +101,9 @@ float Q(V position, I &hitType) {
     }
   }
 
-  distance = dis_stack[sp];
-  hitType = type_stack[sp];
+  // sp zou nu 1 moeten zijn
+  distance = dis_stack[sp]; // TODO: verkleinen door dereferencer te gebruiken
+  hitType = type_stack[sp]; // TODO: idem
 
   float sun = 11 - position.x;
   if (sun < distance) distance = sun, hitType = 1;
@@ -128,12 +122,23 @@ V T(V o,V d){V q,n,e,a=1,w(!V(1,1,3));for(I x=3;x--;){I t=M(o
 <4){F p=6.28*r(),c=r(),s=sqrtf(1-c),g=n.z<0?-1:1,u=-1/(g+n.z),v=n.x*n.y*u;d=V(v,
 g+n.y*n.y*u,-n.y)*(cosf(p)*s)+V(1+g*n.x*n.x*u,g*v,-g*n.x)*(sinf(p)*s)+n*sqrtf(c)
 ;o=q+d*.1;a=a*0.2;}if(t!=5&&i>0&&M(q+n*.1,w,q,n)==1)e=e+a*(t==3?V(200,600,400):(
-t==4?V(100):V(500,400,100)))*i;}R e;}void t(V* a,V b,V c){*a=*a+T(b,c);}I main()
-{I w=320,h=180,s=1;V o(1,5,9),g=!(V(8,4,-8)+o*-1),l=!V(g.z,0,-g.x)*(1./w),u(g.y*
-l.z-g.z*l.y,g.z*l.x-g.x*l.z,g.x*l.y-g.y*l.x);printf("P6 %d %d 255 ",w,h);X**e=(X
-**)malloc(sizeof(X*)*s);for(I y=h;y--;)for(I x=w;x--;){V c;for(I p=s;p--;)e[p]=
-new X(t,&c,o,!(g+l*(x-w/2+r())+u*(y-h/2+r())));for(I p=s;p--;)e[p]->join();c=c*(
-1./s)+14./241;V o=c+1;c=V(c.x/o.x,c.y/o.y,c.z/o.z)*255;printf("%c%c%c",(I)c.x,(I
+t==4?V(100):V(500,400,100)))*i;}R e;}
+
+I main() {
+  I w=160,h=90,s=4;
+  V o(1,5,9),
+    g=!(V(8,4,-8)+o*-1),
+    l=!V(g.z,0,-g.x)*(1./w),
+    u(g.y*l.z-g.z*l.y,g.z*l.x-g.x*l.z,g.x*l.y-g.y*l.x);
+
+  printf("P6 %d %d 255 ",w,h);
+  for(I y=h;y--;)
+    for(I x=w;x--;){
+      V c;
+      for(I p=s;p--;)
+        c = c + T(o, !(g+l*(x-w/2+r())+u*(y-h/2+r())));
+      c=c*(1./s)+14./241;
+      V o=c+1;c=V(c.x/o.x,c.y/o.y,c.z/o.z)*255;printf("%c%c%c",(I)c.x,(I
                                 )c.y,(I)c.z);}}
 
 
