@@ -5,7 +5,7 @@
 #include <math.h>   /*                 P A T H T R A C I N G                  */
 #include <stdlib.h> /*                    My living room                      */
 #define R return    /*                                                        */
-#define O operator  /* $ g++ -lm -std=c++11 -o pt pt.cpp       For more info: */
+#define O operator  /* $ g++ -o pt pt.cpp                      For more info: */
 typedef char const* /* $ ./pt > room.ppm                            curlba.sh */
 S;typedef float F;typedef int I;struct V{F x,y,z;V(F v=0){x=y=z=v;}V(F a,F b,F c
 =0){x=a;y=b;z=c;}V O+(V r){R V(x+r.x,y+r.y,z+r.z);}V O*(V r){R V(x*r.x,y*r.y,z*r
