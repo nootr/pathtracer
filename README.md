@@ -50,31 +50,42 @@ living room and generates an image of it when executed. To make things
 interesting for me, I decided to try my best to keep the code as short as
 possible (although I'm certain the size could be reduced a lot more).
 
-For whoever is interested: this renderer does anti-aliasing and simulates a
-camera with focus point, although you can't really see that from the image.
+For whoever is interested: this renderer does **anti-aliasing** and simulates a
+camera with **focus point**, although you can't really see that from the image.
 
 ## Why?
 I was inspired by Andrew Kensler's business card raytracer ([1]) to learn about
-renderers and create one myself. `Raytracing in one weekend` ([2]) was an
+renderers and create one myself. *Raytracing in one weekend* ([2]) was an
 excellent source which taught me everything I needed to know to write a
 renderer.
 
 ## How?
 The renderer consists of two parts: a simple **Virtual Machine** which calculates
 the distance from a given point to the nearest object and a function which
-calculates the direction that a lightray will go after being reflected of a
-certain surface. The combination of these parts is used to determine how light
-bounces around the room.
+calculates the reflection of a lightray off of a certain surface. The
+combination of these parts is used to determine how light bounces around the
+room.
 
 I chose to write a Virtual Machine as it could shorten the code necessary to
 describe the objects in the model of my living room. The opcodes and their
 arguments are smaller than a byte and the VM will read out the program bit by
 bit.
 
-I also wrote an extremely basic programming language (an overstatement) and a
-**compiler** (a bit more sophisticated, but nothing too fancy) for the VM which
-makes sure not a bit of data is wasted as it is optimized for this specific
-3D-model.
+| bits   | opcode                                                   |
+|--------|----------------------------------------------------------|
+| 1      | *box(down_x, down_y, down_z, up_x, up_y, up_z);*         |
+| 000    | *sphere(center_x, center_y, center_z, radius);*          |
+| 001    | *cilinder(bottom_x, bottom_y, bottom_z, height, width);* |
+| 01000  | *rotate_type();*                                         |
+| 01001  | *if_less_than_one { BLOCK }*                             |
+| 01010  | *invert();*                                              |
+| 010110 | *toggle_duplicate();*                                    |
+| 010111 | *halt();*                                                |
+| 011    | *min();*                                                 |
+
+To save myself from writing the program bit by bit, I've written a **compiler**
+which makes sure not a bit of data is wasted as it is optimized for this
+specific 3D-model.
 
 Note that you can adjust the resolution of the resulting image and the
 sample rate (higher means less noise) by adjusting the values for the `w`, `h`
