@@ -45,11 +45,18 @@ c.x/o.x,c.y/o.y,c.z/o.z)*255;printf("%c%c%c",(I)c.x,(I)c.y,(I)c.z);}} //  Hartog
 ## What?
 This program is a code golf renderer; it's a program that contains a model of my
 living room and generates an image of it when executed. To make things
-interesting for me, I decided to try my best to keep the code as short as
+even more interesting, I decided to try my best to keep the code as short as
 possible (although I'm certain the size could be reduced a lot more).
 
 For whoever is interested: this renderer does **anti-aliasing** and simulates a
 camera with **focus point**, although you can't really see that from the image.
+Please note that the code for this renderer was made to be as short as possible,
+so most tricks that were used to speed things up were removed to shorten the
+code (e.g. it used to have threading, but not anymore). It does, however, only
+calculate object details when it's close.
+
+Rendering without changing the width, height and samplerate settings will take
+around 3-5 minutes.
 
 ## Why?
 I was inspired by Andrew Kensler's business card raytracer ([1]) to learn about
