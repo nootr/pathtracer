@@ -11,26 +11,26 @@
   * The stack elements are floats.
   *
   * General:
-  * 0010 PSV(VALUE) - Push VALUE to stack
-  * ???? PSR() - Push register value to stack
-  * ???? POP(N) - Pop Nth value from top of stack and write to register
+  * 0010 PSH(VALUE) - Push VALUE to stack
+  * ???? POP() - Pop value from top of stack
+  * ???? PON(N) - Pop Nth value from top of stack and push to top
   *
   * Functions/branching:
-  * ???? CAL() - Relative jump to address in register and push last address to
+  * ???? CAL() - Relative jump to address on stack and push last address to
   *              stack
-  * ???? RET() - Absolute jump to address in register
-  * ???? JIZ() - Relative jump to address in register if value is zero
-  * ???? JIN() - Relative jump to address in register if value is negative
+  * ???? RET() - Absolute jump to address on stack and reset frame pointer
+  * ???? BRZ() - Relative jump to address on stack if value is zero
+  * ???? BRN() - Relative jump to address on stack if value is negative
   *
   * Arithmetic:
   * ???? ADD() - Pop two values and push the sum
   * ???? MUL() - Pop two values and push the product
   * ???? DIV() - Pop two values and push the ratio
   * ???? SQR() - Pop a value and push the square root
-  * ???? INV() - Pop a value and push it multiplied by -1
+  * 0100 INV() - Pop a value and push it multiplied by -1
   *
   * System:
-  * ???? RND() - Push a random value between 0.0 and 1.0
+  * 0011 RND() - Push a random value between 0.0 and 1.0
   * 0001 PNT() - Pop a value, convert it to an integer, then to a character and
   *              print it to STDOUT
   * 0000 HLT() - Halt the program
@@ -41,12 +41,13 @@
   * from the list.
   */
 
-#include "stdio.h"
+#include <stdio.h>  // printf()
+#include <stdlib.h> // rand(), RAND_MAX
 
 float stack[999];
 /* Test program:
- * 0010 0000 1010 PSV(10) # Push newline to stack
- * 0010 0010 0001 PSV(33) # Push '!' to stack
+ * 0010 0000 1010 PSH(10) # Push newline to stack
+ * 0010 0010 0001 PSH(33) # Push '!' to stack
  * 0001           PNT()   # Print "!\n"
  * 0001           PNT()
  * 0000           HLT()
@@ -75,11 +76,17 @@ int get_quad(int x=4)
 int main() {
   printf("P6 200 100 255 ");
   while((op=get_quad()))
-    --op?
-      // OP != 0001
-      --op?
-        // OP != 0010
-        // TODO
+    --op?--op?--op?--op?--op?
+              op
+            :
+              // 0101 ?
+              op
+          :
+            // 0100 INV() - Pop, multiply by -1 and push
+            stack[sp] *= -1
+        :
+          // 0011 RND() - Push random value between 0.0 and 1.0
+          stack[++sp] = (float) rand() / RAND_MAX
       :
         // 0010 PSV(VALUE) - Push VALUE to stack
         stack[++sp] = get_quad(8)
