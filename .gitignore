@@ -1,4 +1,5 @@
 *.swp
 .DS_Store
-raytracing_in_a_weekend
 pt
+test.ppm
+pt.dSYM/
