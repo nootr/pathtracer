@@ -51,7 +51,7 @@ float QueryDatabase(Vec position, int &hitType) {
   float distance = 1e9;
 
   float closest ;
-  closest = -min(// Room
+  closest = -min( // Room
                   BoxTest(position, Vec(0), Vec(10, 3, 3)),
                       // Window
                   min(BoxTest(position, Vec(5, 1, 2), Vec(8, 2, 5)),
@@ -60,17 +60,19 @@ float QueryDatabase(Vec position, int &hitType) {
   if (closest < distance) distance = closest, hitType = HIT_WALL;
 
   for (int x=2;x<9;x++)
-    closest = min(closest, BoxTest(position, Vec(x+0.05, 0), Vec(x+1, 1, 1)));
+    closest = min(closest, BoxTest(position, Vec(x+0.04, 0), Vec(x+1, 1, 1)));
 
   closest = min(
       -min(-closest,
         BoxTest(position, Vec(4.1, 0, 0.1), Vec(4.9, 2, 0.9))),
-      min(BoxTest(position, Vec(9, 0, 1), Vec(10, 2.5, 1.7)),
-        BoxTest(position, Vec(9, 0, 1.75), Vec(10, 2.5, 2.8))));
+      min(BoxTest(position, Vec(9, 0, 1), Vec(10, 2.5, 1.78)),
+        BoxTest(position, Vec(9, 0, 1.8), Vec(10, 2.5, 2.8))));
 
   if (closest < distance) distance = closest, hitType = HIT_BLACK;
 
-  closest = BoxTest(position, Vec(7.1, 0.1), Vec(7.9, 0.8, 1.03));
+  closest = min(
+      BoxTest(position, Vec(7.1, 0.1), Vec(7.9, 0.8, 1.03)),
+      BoxTest(position, Vec(7.1, 1, 0.1), Vec(7.9, 1.05, 0.9)));
   if (closest < distance) distance = closest, hitType = HIT_OVEN;
 
   closest = -min(
@@ -97,7 +99,7 @@ int RayMarching(Vec origin, Vec direction, Vec &hitPos, Vec &hitNorm) {
 
   // Signed distance marching
   for (float total_d=0; total_d < 100; total_d += d)
-    if ((d = QueryDatabase(hitPos = origin + direction * total_d, hitType)) < .01
+    if ((d = QueryDatabase(hitPos = origin + direction * total_d, hitType)) < .004
             || ++noHitCount > 99)
       return hitNorm =
          !Vec(QueryDatabase(hitPos + Vec(.01, 0), noHitCount) - d,
@@ -140,14 +142,14 @@ Vec Trace(Vec origin, Vec direction) {
       color = color + attenuation * Vec(50, 80, 100); break;
     }
     if (hitType == HIT_LIGHT) {
-      color = color + attenuation * Vec(50, 45, 10); break;
+      color = color + attenuation * Vec(45, 40, 10); break;
     }
   }
   return color;
 }
 
 int main() {
-  int w = 200, h = 100, samplesCount = 128;
+  int w = 400, h = 200, samplesCount = 128;
   Vec position(1.5, 1.5, 2.5);
   Vec goal = !(Vec(7,1,0) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
