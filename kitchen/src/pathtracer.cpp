@@ -40,10 +40,12 @@ float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
 }
 
 #define HIT_NONE 0
-#define HIT_OVEN 1
-#define HIT_WALL 2
-#define HIT_SUN 3
-#define HIT_LIGHT 4
+#define HIT_WHITE 1
+#define HIT_OVEN 2
+#define HIT_WALL 3
+#define HIT_SUN 4
+#define HIT_BLACK 5
+#define HIT_LIGHT 6
 
 float QueryDatabase(Vec position, int &hitType) {
   float distance = 1e9;
@@ -57,8 +59,24 @@ float QueryDatabase(Vec position, int &hitType) {
                       BoxTest(position, Vec(1, 0.2, 2), Vec(4.9, 2, 5))));
   if (closest < distance) distance = closest, hitType = HIT_WALL;
 
-  closest = BoxTest(position, Vec(7, 0), Vec(8, 1, .5));
+  for (int x=2;x<9;x++)
+    closest = min(closest, BoxTest(position, Vec(x+0.05, 0), Vec(x+1, 1, 1)));
+
+  closest = min(
+      -min(-closest,
+        BoxTest(position, Vec(4.1, 0, 0.1), Vec(4.9, 2, 0.9))),
+      min(BoxTest(position, Vec(9, 0, 1), Vec(10, 2.5, 1.7)),
+        BoxTest(position, Vec(9, 0, 1.75), Vec(10, 2.5, 2.8))));
+
+  if (closest < distance) distance = closest, hitType = HIT_BLACK;
+
+  closest = BoxTest(position, Vec(7.1, 0.1), Vec(7.9, 0.8, 1.03));
   if (closest < distance) distance = closest, hitType = HIT_OVEN;
+
+  closest = -min(
+      -BoxTest(position, Vec(2, 1), Vec(10, 1.04, 1)),
+      BoxTest(position, Vec(4.1, 0, 0.1), Vec(4.9, 2, 0.9)));
+  if (closest < distance) distance = closest, hitType = HIT_WHITE;
 
   closest = BoxTest(position, Vec(1.99, 0), Vec(2));
   if (closest < distance) distance = closest, hitType = HIT_WALL;
@@ -101,7 +119,7 @@ Vec Trace(Vec origin, Vec direction) {
       origin = sampledPosition + direction * 0.1;
       attenuation = attenuation * 0.2; // Attenuation via distance traveled.
     }
-    if (hitType == HIT_WALL) { // Wall hit uses color yellow?
+    if (hitType % 2){ // Wall(3), White(1), Black(5)
       float p = 6.283185 * randomVal();
       float c = randomVal();
       float s = sqrtf(1 - c);
@@ -116,7 +134,7 @@ Vec Trace(Vec origin, Vec direction) {
                       g * v,
                       -g * normal.x) * (sinf(p) * s) + normal * sqrtf(c);
       origin = sampledPosition + direction * .1;
-      attenuation = attenuation * 0.2;
+      attenuation = attenuation * (hitType<5?0.2:0.02);
     }
     if (hitType == HIT_SUN) {
       color = color + attenuation * Vec(50, 80, 100); break;
@@ -130,7 +148,7 @@ Vec Trace(Vec origin, Vec direction) {
 
 int main() {
   int w = 200, h = 100, samplesCount = 128;
-  Vec position(1.5, 1, 2.5);
+  Vec position(1.5, 1.5, 2.5);
   Vec goal = !(Vec(7,1,0) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
 
