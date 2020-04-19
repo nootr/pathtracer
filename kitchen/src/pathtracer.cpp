@@ -38,6 +38,18 @@ float BoxTest(Vec position, Vec lowerLeft, Vec upperRight) {
                   min(lowerLeft.y, upperRight.y)),
           min(lowerLeft.z, upperRight.z));
 }
+float CilinderTest(Vec position, Vec bottom, float height, float width) {
+  Vec delta = position + bottom * -1;
+  delta.y = 0;
+
+  Vec down = position + bottom * -1;
+  Vec up = bottom + Vec(0, height, 0) + position * -1;
+
+  return -min(
+      width - sqrtf(delta % delta),
+      min(down.y, up.y)
+      );
+}
 
 #define HIT_NONE 0
 #define HIT_WHITE 1
@@ -64,13 +76,17 @@ float QueryDatabase(Vec position, int &hitType) {
 
   closest = min(
       -min(-closest,
-        BoxTest(position, Vec(4.1, 0, .1), Vec(4.9, 2, .9))),
+        BoxTest(position, Vec(4.1, 0, .3), Vec(4.9, 2, .9))),
       min(BoxTest(position, Vec(9, 0, 1), Vec(10, 2.5, 1.78)),
       min(BoxTest(position, Vec(9, 0, 1.8), Vec(10, 2.5, 2.8)),
       min(BoxTest(position, Vec(9, 1.5), Vec(10, 1.54, 1)),
-      min(BoxTest(position, Vec(9, 2), Vec(10, 2.04, 1)),
+      min(BoxTest(position, Vec(9, 2.16), Vec(10, 2.2, 1)),
       min(BoxTest(position, Vec(6.7, 1.9), Vec(8.3, 2, .9)),
-          BoxTest(position, Vec(7.1, 2), Vec(8.3, 3, .3))))))));
+      min(BoxTest(position, Vec(7.1, 2), Vec(8.3, 3, .3)),
+      min(BoxTest(position, Vec(4.49, 1.4, .15), Vec(4.51, 1.45, 0.45)),
+      min(CilinderTest(position, Vec(4.5, 1, .15), .45, .02),
+          CilinderTest(position, Vec(4.5, 1, .15), .2, .04)
+      )))))))));
   if (closest < distance) distance = closest, hitType = HIT_BLACK;
 
   closest = min(
@@ -80,7 +96,7 @@ float QueryDatabase(Vec position, int &hitType) {
 
   closest = -min(
       -BoxTest(position, Vec(2, 1), Vec(10, 1.04, 1)),
-      BoxTest(position, Vec(4.1, 0, 0.1), Vec(4.9, 2, 0.9)));
+      BoxTest(position, Vec(4.1, 0, .3), Vec(4.9, 2, .9)));
   if (closest < distance) distance = closest, hitType = HIT_WHITE;
 
   closest = BoxTest(position, Vec(1.99, 0), Vec(2));
@@ -152,7 +168,7 @@ Vec Trace(Vec origin, Vec direction) {
 }
 
 int main() {
-  int w = 200, h = 100, samplesCount = 32;
+  int w = 200, h = 100, samplesCount = 128;
   Vec position(1.5, 1.5, 2.5);
   Vec goal = !(Vec(7,1,0) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
