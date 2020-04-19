@@ -64,10 +64,13 @@ float QueryDatabase(Vec position, int &hitType) {
 
   closest = min(
       -min(-closest,
-        BoxTest(position, Vec(4.1, 0, 0.1), Vec(4.9, 2, 0.9))),
+        BoxTest(position, Vec(4.1, 0, .1), Vec(4.9, 2, .9))),
       min(BoxTest(position, Vec(9, 0, 1), Vec(10, 2.5, 1.78)),
-        BoxTest(position, Vec(9, 0, 1.8), Vec(10, 2.5, 2.8))));
-
+      min(BoxTest(position, Vec(9, 0, 1.8), Vec(10, 2.5, 2.8)),
+      min(BoxTest(position, Vec(9, 1.5), Vec(10, 1.54, 1)),
+      min(BoxTest(position, Vec(9, 2), Vec(10, 2.04, 1)),
+      min(BoxTest(position, Vec(6.7, 1.9), Vec(8.3, 2, .9)),
+          BoxTest(position, Vec(7.1, 2), Vec(8.3, 3, .3))))))));
   if (closest < distance) distance = closest, hitType = HIT_BLACK;
 
   closest = min(
@@ -149,7 +152,7 @@ Vec Trace(Vec origin, Vec direction) {
 }
 
 int main() {
-  int w = 400, h = 200, samplesCount = 128;
+  int w = 200, h = 100, samplesCount = 32;
   Vec position(1.5, 1.5, 2.5);
   Vec goal = !(Vec(7,1,0) + position * -1);
   Vec left = !Vec(goal.z, 0, -goal.x) * (1. / w);
