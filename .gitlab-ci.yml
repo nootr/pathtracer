@@ -1,0 +1,25 @@
+image: centos:7
+
+stages:
+  - render
+
+render_kitchen:
+  script:
+    - yum install make gcc gcc-c++ -y
+    - cd kitchen
+    - make
+  artifacts:
+    paths:
+      - kitchen/test.ppm
+  stage: render
+
+render_livingroom:
+  script:
+    - yum install make gcc gcc-c++ -y
+    - cd livingroom
+    - make
+  artifacts:
+    paths:
+      - livingroom/test.ppm
+  stage: render
+
